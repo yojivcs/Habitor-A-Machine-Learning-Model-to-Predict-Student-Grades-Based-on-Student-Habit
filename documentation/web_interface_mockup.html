@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habitor - Student Grade Prediction System</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --accent-color: #ea4335;
+            --light-color: #f8f9fa;
+            --dark-color: #202124;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        
+        nav ul li a:hover {
+            opacity: 0.8;
+        }
+        
+        .hero {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: #3367d6;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .prediction-form {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin-bottom: 50px;
+        }
+        
+        .prediction-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .submit-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 30px auto 0;
+            width: 200px;
+        }
+        
+        .submit-button:hover {
+            background-color: #2d9249;
+        }
+        
+        .results-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin-bottom: 50px;
+            display: none;
+        }
+        
+        .results-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .prediction-result {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .prediction-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .prediction-label {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .chart {
+            background-color: #f5f5f5;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            height: 300px;
+        }
+        
+        .recommendations {
+            margin-top: 40px;
+        }
+        
+        .recommendations h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .recommendation-item {
+            background-color: #f5f5f5;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .recommendation-icon {
+            font-size: 24px;
+            color: var(--accent-color);
+            margin-right: 15px;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        footer p {
+            margin-bottom: 20px;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 24px;
+            transition: opacity 0.3s;
+        }
+        
+        .social-links a:hover {
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+                justify-content: center;
+            }
+            
+            nav ul li {
+                margin: 0 10px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <!-- For icons, using Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Habitor</div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#prediction">Prediction</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section id="home" class="hero">
+            <h1>Predict Your Academic Success</h1>
+            <p>Habitor uses advanced machine learning to analyze your habits and predict academic performance. Discover which habits have the biggest impact on your grades and get personalized recommendations for improvement.</p>
+            <a href="#prediction" class="cta-button">Try It Now</a>
+        </section>
+        
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Accurate Predictions</h3>
+                <p>Our advanced BI-LSTM and Gradient Boosting algorithms provide highly accurate grade predictions based on your habits.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3>Personalized Insights</h3>
+                <p>Discover which of your habits have the most significant impact on your academic performance.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3>Actionable Recommendations</h3>
+                <p>Get personalized suggestions on how to modify your habits for better academic outcomes.</p>
+            </div>
+        </section>
+        
+        <section id="prediction" class="prediction-form">
+            <h2>Predict Your Grade</h2>
+            <form id="habit-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="study-hours">Study Hours Per Day</label>
+                        <input type="number" id="study-hours" min="0" max="24" step="0.1" placeholder="e.g., 3.5" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="class-response">Class Responsive Rate (%)</label>
+                        <input type="number" id="class-response" min="0" max="100" step="1" placeholder="e.g., 75" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="extra-classes">Participation In Extra Classes (%)</label>
+                        <input type="number" id="extra-classes" min="0" max="100" step="1" placeholder="e.g., 50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assessment-rate">Student Assessment Rate (%)</label>
+                        <input type="number" id="assessment-rate" min="0" max="100" step="1" placeholder="e.g., 80" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sleep-hours">Sleep Hours Per Day</label>
+                        <input type="number" id="sleep-hours" min="0" max="24" step="0.1" placeholder="e.g., 7.5" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="screen-time">Screen Time Per Day (hours)</label>
+                        <input type="number" id="screen-time" min="0" max="24" step="0.1" placeholder="e.g., 4.2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stress-level">Stress Level</label>
+                        <select id="stress-level" required>
+                            <option value="" disabled selected>Select your stress level</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parental-involvement">Parental Involvement</label>
+                        <select id="parental-involvement" required>
+                            <option value="" disabled selected>Select level of involvement</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-button">Predict My Grade</button>
+            </form>
+        </section>
+        
+        <section id="results" class="results-section">
+            <h2>Your Prediction Results</h2>
+            
+            <div class="prediction-result">
+                <div class="prediction-value">3.45</div>
+                <div class="prediction-label">Predicted CGPA</div>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart" id="feature-importance-chart">
+                    <h3>Feature Importance</h3>
+                    <!-- Chart would be rendered here with JavaScript -->
+                    <p style="text-align: center; padding-top: 100px; color: #999;">Feature importance visualization</p>
+                </div>
+                
+                <div class="chart" id="comparison-chart">
+                    <h3>Your Habits vs. High Performers</h3>
+                    <!-- Chart would be rendered here with JavaScript -->
+                    <p style="text-align: center; padding-top: 100px; color: #999;">Habits comparison visualization</p>
+                </div>
+            </div>
+            
+            <div class="recommendations">
+                <h3>Personalized Recommendations</h3>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <strong>Increase Study Hours</strong>
+                        <p>Increasing your daily study time from 2.5 to 4 hours could improve your CGPA by approximately 0.3 points.</p>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <div>
+                        <strong>Improve Sleep Schedule</strong>
+                        <p>Aim for 7-8 hours of sleep consistently. Your current irregular sleep pattern may be negatively affecting your concentration.</p>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div>
+                        <strong>Reduce Screen Time</strong>
+                        <p>Consider reducing your daily screen time by 1.5 hours. This could free up time for studying and improve your focus.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="#prediction" class="cta-button">Try Another Prediction</a>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>© 2023 Habitor - Student Grade Prediction System. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p>Built with advanced machine learning to help students achieve their academic potential.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Simple JavaScript to show the results section when the form is submitted
+        document.getElementById('habit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('results').style.display = 'block';
+            window.location.href = '#results';
+        });
+    </script>
+</body>
+</html> 
