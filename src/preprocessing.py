@@ -7,13 +7,49 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Update this function to match the provided grade sheet
+def convert_cgpa_to_letter_grade(cgpa):
+    """
+    Convert CGPA/percentage to letter grade according to provided grade sheet
+    
+    Args:
+        cgpa (float): CGPA or percentage value
+        
+    Returns:
+        str: Letter grade
+    """
+    # Convert CGPA to percentage scale (assuming CGPA is on 4.0 scale)
+    percentage = (cgpa / 4.0) * 100
+    
+    if percentage >= 80:
+        return 'A+'
+    elif percentage >= 75:
+        return 'A'
+    elif percentage >= 70:
+        return 'A-'
+    elif percentage >= 65:
+        return 'B+'
+    elif percentage >= 60:
+        return 'B'
+    elif percentage >= 55:
+        return 'B-'
+    elif percentage >= 50:
+        return 'C+'
+    elif percentage >= 45:
+        return 'C'
+    elif percentage >= 40:
+        return 'D'
+    else:
+        return 'F'
+
 class DataPreprocessor:
-    def __init__(self, data):
+    def __init__(self, data, classification_mode=False):
         """
         Initialize the DataPreprocessor with the dataset
         
         Args:
             data (pandas.DataFrame): The student habits dataset
+            classification_mode (bool): Whether to use classification mode
         """
         self.data = data.copy()  # Create a copy to avoid modifying the original
         self.X_train = None
@@ -24,6 +60,8 @@ class DataPreprocessor:
         self.label_encoders = {}
         self.categorical_cols = []
         self.numerical_cols = []
+        self.classification_mode = classification_mode
+        self.grade_encoder = None
         
         # Create output directory if it doesn't exist
         os.makedirs('output/preprocessing', exist_ok=True)
@@ -229,6 +267,34 @@ class DataPreprocessor:
         X = self.data.drop(['Student_ID', 'CGPA'], axis=1, errors='ignore')
         y = self.data['CGPA']
         
+        # If in classification mode, convert CGPA to letter grades
+        if self.classification_mode:
+            print("Converting CGPA to letter grades for classification...")
+            
+            # Convert to letter grades
+            y_grades = y.apply(convert_cgpa_to_letter_grade)
+            
+            # Encode letter grades
+            self.grade_encoder = LabelEncoder()
+            y_encoded = self.grade_encoder.fit_transform(y_grades)
+            
+            # Save grade encoding mapping
+            grade_mapping = dict(zip(self.grade_encoder.classes_, range(len(self.grade_encoder.classes_))))
+            with open('output/preprocessing/grade_mapping.txt', 'w') as f:
+                f.write("=== Grade Encoding Mapping ===\n\n")
+                for grade, code in grade_mapping.items():
+                    f.write(f"{grade} -> {code}\n")
+            
+            # Save grade encoder
+            with open('output/preprocessing/grade_encoder.pkl', 'wb') as f:
+                pickle.dump(self.grade_encoder, f)
+            
+            print(f"Encoded letter grades: {grade_mapping}")
+            print("Saved grade mapping to output/preprocessing/grade_mapping.txt")
+            
+            # Use encoded grades as target
+            y = y_encoded
+        
         # Split the data
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             X, y, test_size=test_size, random_state=random_state
@@ -238,8 +304,8 @@ class DataPreprocessor:
         print(f"Testing set: {self.X_test.shape[0]} samples")
         
         # Save split data for later use
-        train_data = pd.concat([self.X_train, self.y_train], axis=1)
-        test_data = pd.concat([self.X_test, self.y_test], axis=1)
+        train_data = pd.concat([self.X_train, pd.Series(self.y_train, index=self.X_train.index, name='Target')], axis=1)
+        test_data = pd.concat([self.X_test, pd.Series(self.y_test, index=self.X_test.index, name='Target')], axis=1)
         
         train_data.to_csv('output/preprocessing/train_data.csv', index=False)
         test_data.to_csv('output/preprocessing/test_data.csv', index=False)
@@ -258,15 +324,40 @@ class DataPreprocessor:
         """
         plt.figure(figsize=(10, 6))
         
-        plt.subplot(1, 2, 1)
-        sns.histplot(self.y_train, kde=True, color='blue')
-        plt.title('Training Set CGPA Distribution')
-        plt.xlabel('CGPA')
-        
-        plt.subplot(1, 2, 2)
-        sns.histplot(self.y_test, kde=True, color='green')
-        plt.title('Testing Set CGPA Distribution')
-        plt.xlabel('CGPA')
+        if self.classification_mode:
+            # For classification mode, show class distribution
+            train_counts = pd.Series(self.y_train).value_counts().sort_index()
+            test_counts = pd.Series(self.y_test).value_counts().sort_index()
+            
+            # Get all unique classes
+            all_classes = sorted(set(train_counts.index) | set(test_counts.index))
+            
+            # Create bar chart for train data
+            plt.subplot(1, 2, 1)
+            sns.barplot(x=train_counts.index, y=train_counts.values, color='blue')
+            plt.title('Training Set Class Distribution')
+            plt.xlabel('Class')
+            plt.ylabel('Count')
+            plt.xticks(range(len(all_classes)), [self.grade_encoder.inverse_transform([c])[0] for c in all_classes])
+            
+            # Create bar chart for test data
+            plt.subplot(1, 2, 2)
+            sns.barplot(x=test_counts.index, y=test_counts.values, color='green')
+            plt.title('Testing Set Class Distribution')
+            plt.xlabel('Class')
+            plt.ylabel('Count')
+            plt.xticks(range(len(all_classes)), [self.grade_encoder.inverse_transform([c])[0] for c in all_classes])
+        else:
+            # For regression mode, show CGPA distribution
+            plt.subplot(1, 2, 1)
+            sns.histplot(self.y_train, kde=True, color='blue')
+            plt.title('Training Set CGPA Distribution')
+            plt.xlabel('CGPA')
+            
+            plt.subplot(1, 2, 2)
+            sns.histplot(self.y_test, kde=True, color='green')
+            plt.title('Testing Set CGPA Distribution')
+            plt.xlabel('CGPA')
         
         plt.tight_layout()
         plt.savefig('output/preprocessing/train_test_distribution.png')
@@ -278,6 +369,7 @@ class DataPreprocessor:
         Run the full preprocessing pipeline
         """
         print("\n=== Starting Data Preprocessing ===")
+        print(f"Mode: {'Classification' if self.classification_mode else 'Regression'}")
         
         # Step 1: Identify column types
         self.identify_column_types()

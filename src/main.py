@@ -10,7 +10,7 @@ import argparse
 # Import all our modules
 from data_collection import DataCollector
 from data_visualization import DataVisualizer
-from preprocessing import DataPreprocessor
+from preprocessing import DataPreprocessor, convert_cgpa_to_letter_grade
 from count_vectorization import FeatureVectorizer
 from bilstm_model import BiLSTMModel
 from gradient_boosting_model import GradientBoostingModel
@@ -18,16 +18,18 @@ from future_prediction import FuturePredictor
 from model_evaluation import ModelEvaluator
 
 class HabitorPipeline:
-    def __init__(self, data_path, output_dir="output"):
+    def __init__(self, data_path, output_dir="output", classification_mode=False):
         """
         Initialize the Habitor Pipeline
         
         Args:
             data_path (str): Path to the student habits dataset
             output_dir (str): Path to the output directory
+            classification_mode (bool): Whether to use classification mode
         """
         self.data_path = data_path
         self.output_dir = output_dir
+        self.classification_mode = classification_mode
         
         # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
@@ -52,6 +54,7 @@ class HabitorPipeline:
         self.X_test_vectorized = None
         
         print(f"Habitor Pipeline initialized with data path: {data_path}")
+        print(f"Mode: {'Classification' if self.classification_mode else 'Regression'}")
     
     def collect_data(self):
         """
@@ -88,7 +91,7 @@ class HabitorPipeline:
         if self.data is None:
             self.collect_data()
         
-        self.preprocessor = DataPreprocessor(self.data)
+        self.preprocessor = DataPreprocessor(self.data, classification_mode=self.classification_mode)
         self.X_train, self.X_test, self.y_train, self.y_test = self.preprocessor.preprocess_data()
         
         return self.X_train, self.X_test, self.y_train, self.y_test
@@ -124,7 +127,15 @@ class HabitorPipeline:
         X_test_dense = self.X_test_vectorized.toarray() if hasattr(self.X_test_vectorized, 'toarray') else self.X_test_vectorized
         
         # Build and train BI-LSTM model
-        self.bilstm_model = BiLSTMModel(X_train_dense.shape[1])
+        if self.classification_mode:
+            # Get number of classes for classification
+            num_classes = len(np.unique(self.y_train))
+            print(f"Training classification model with {num_classes} classes")
+            
+            self.bilstm_model = BiLSTMModel(X_train_dense.shape[1], is_classifier=True, num_classes=num_classes)
+        else:
+            self.bilstm_model = BiLSTMModel(X_train_dense.shape[1])
+            
         self.bilstm_model.build_model()
         self.bilstm_model.train(X_train_dense, self.y_train, X_test_dense, self.y_test, epochs=epochs)
         
@@ -150,7 +161,7 @@ class HabitorPipeline:
         X_test_dense = self.X_test_vectorized.toarray() if hasattr(self.X_test_vectorized, 'toarray') else self.X_test_vectorized
         
         # Build and train Gradient Boosting model
-        self.gb_model = GradientBoostingModel()
+        self.gb_model = GradientBoostingModel(is_classifier=self.classification_mode)
         
         if hyperparameter_tuning:
             self.gb_model.hyperparameter_tuning(X_train_dense, self.y_train)
@@ -181,7 +192,8 @@ class HabitorPipeline:
         # Create future predictor
         self.predictor = FuturePredictor(
             bilstm_model=self.bilstm_model.model,
-            gradient_model=self.gb_model.model
+            gradient_model=self.gb_model.model,
+            is_classifier=self.classification_mode
         )
         
         # Make predictions
@@ -210,8 +222,8 @@ class HabitorPipeline:
         self.evaluator = ModelEvaluator()
         
         # Add models to evaluator
-        self.evaluator.add_model('BI_LSTM', self.bilstm_model.model)
-        self.evaluator.add_model('Gradient_Boosting', self.gb_model.model)
+        self.evaluator.add_model('BI_LSTM', self.bilstm_model.model, is_classifier=self.classification_mode)
+        self.evaluator.add_model('Gradient_Boosting', self.gb_model.model, is_classifier=self.classification_mode)
         
         # Evaluate models
         metrics = self.evaluator.evaluate_all(X_test_dense, self.y_test)
@@ -230,6 +242,7 @@ class HabitorPipeline:
         print("         HABITOR PIPELINE EXECUTION         ")
         print("============================================")
         print("Starting the full Habitor pipeline for student grade prediction")
+        print(f"Mode: {'Classification' if self.classification_mode else 'Regression'}")
         print("--------------------------------------------")
         
         # Record start time
@@ -267,6 +280,7 @@ class HabitorPipeline:
         print("\n============================================")
         print("         PIPELINE EXECUTION SUMMARY         ")
         print("============================================")
+        print(f"Mode: {'Classification' if self.classification_mode else 'Regression'}")
         print(f"Total execution time: {total_time:.2f} seconds")
         print(f"All outputs saved to: {self.output_dir}/")
         print("--------------------------------------------")
@@ -274,14 +288,18 @@ class HabitorPipeline:
         if self.evaluator and self.evaluator.best_model:
             print(f"Best model: {self.evaluator.best_model}")
             
-            if self.evaluator.best_model == 'BI_LSTM':
-                metrics = self.evaluator.metrics['BI_LSTM']
-                print(f"RMSE: {metrics['rmse']:.4f}")
-                print(f"R2 Score: {metrics['r2']:.4f}")
+            if self.classification_mode:
+                metrics = self.evaluator.metrics[self.evaluator.best_model]
+                print(f"Accuracy: {metrics['accuracy']:.4f}")
             else:
-                metrics = self.evaluator.metrics['Gradient_Boosting']
-                print(f"RMSE: {metrics['rmse']:.4f}")
-                print(f"R2 Score: {metrics['r2']:.4f}")
+                if self.evaluator.best_model == 'BI_LSTM':
+                    metrics = self.evaluator.metrics['BI_LSTM']
+                    print(f"RMSE: {metrics['rmse']:.4f}")
+                    print(f"R2 Score: {metrics['r2']:.4f}")
+                else:
+                    metrics = self.evaluator.metrics['Gradient_Boosting']
+                    print(f"RMSE: {metrics['rmse']:.4f}")
+                    print(f"R2 Score: {metrics['r2']:.4f}")
         
         print("\nHabitor pipeline completed successfully!")
         print("============================================")
@@ -314,6 +332,8 @@ def main():
                         help='Number of epochs for BI-LSTM training')
     parser.add_argument('--tune', action='store_true',
                         help='Perform hyperparameter tuning for Gradient Boosting')
+    parser.add_argument('--classification', action='store_true',
+                        help='Run in classification mode (predict letter grades instead of CGPA)')
     parser.add_argument('--steps', type=str, nargs='+', 
                         choices=['data', 'visualization', 'preprocessing', 'vectorization', 
                                 'bilstm', 'gradient', 'prediction', 'evaluation', 'all'],
@@ -323,7 +343,7 @@ def main():
     args = parser.parse_args()
     
     # Create pipeline
-    pipeline = HabitorPipeline(args.data, args.output)
+    pipeline = HabitorPipeline(args.data, args.output, classification_mode=args.classification)
     
     # Run specified steps or full pipeline
     if 'all' in args.steps:

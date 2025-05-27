@@ -1,0 +1,19 @@
+main.py (root) - Entry point that runs the pipeline
+  │
+  ├─> src/main.py - Main orchestrator that coordinates all modules
+      │
+      ├─> data_collection.py - Loads and processes dataset from Excel/CSV
+      │
+      ├─> data_visualization.py - Creates visualizations (correlation heatmaps, distributions)
+      │
+      ├─> preprocessing.py - Handles missing values, encoding, scaling, train/test split
+      │
+      ├─> count_vectorization.py - Transforms categorical data to numerical vectors
+      │
+      ├─> bilstm_model.py - Implements Bidirectional LSTM neural network for prediction
+      │
+      ├─> gradient_boosting_model.py - Implements Gradient Boosting model for prediction
+      │
+      ├─> future_prediction.py - Makes predictions using trained models and generates reports
+      │
+      └─> model_evaluation.py - Compares models and creates evaluation metrics/visuals 

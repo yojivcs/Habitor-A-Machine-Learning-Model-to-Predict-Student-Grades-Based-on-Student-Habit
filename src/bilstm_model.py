@@ -7,26 +7,33 @@ from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import os
 import pickle
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+import seaborn as sns
+import pandas as pd
 
 class BiLSTMModel:
-    def __init__(self, input_shape):
+    def __init__(self, input_shape, is_classifier=False, num_classes=None):
         """
         Initialize the Bidirectional LSTM model
         
         Args:
             input_shape (int): Number of features in the input data
+            is_classifier (bool): Whether the model is a classifier
+            num_classes (int): Number of classes for classification (required if is_classifier is True)
         """
         self.input_shape = input_shape
         self.model = None
         self.history = None
         self.reshape_required = True  # LSTM requires 3D input
+        self.is_classifier = is_classifier
+        self.num_classes = num_classes
         
         # Create output directory if it doesn't exist
         os.makedirs('output/bilstm', exist_ok=True)
     
     def build_model(self, lstm_units=64, dropout_rate=0.2, learning_rate=0.001):
         """
-        Build a Bidirectional LSTM model for regression
+        Build a Bidirectional LSTM model for regression or classification
         
         Args:
             lstm_units (int): Number of LSTM units
@@ -37,6 +44,7 @@ class BiLSTMModel:
             tensorflow.keras.Model: Built model
         """
         print("Building BI-LSTM model...")
+        print(f"Model type: {'Classification' if self.is_classifier else 'Regression'}")
         
         # Create sequential model
         model = Sequential(name="BiLSTM_Model")
@@ -58,15 +66,33 @@ class BiLSTMModel:
         ))
         model.add(Dropout(dropout_rate))
         
-        # Output layer
-        model.add(Dense(1, activation='linear', name="Output"))
+        # Output layer - different for classification vs regression
+        if self.is_classifier:
+            if self.num_classes is None:
+                raise ValueError("num_classes must be specified for classification")
+                
+            if self.num_classes == 2:
+                # Binary classification
+                model.add(Dense(1, activation='sigmoid', name="Output"))
+                loss = 'binary_crossentropy'
+                metrics = ['accuracy']
+            else:
+                # Multi-class classification
+                model.add(Dense(self.num_classes, activation='softmax', name="Output"))
+                loss = 'sparse_categorical_crossentropy'
+                metrics = ['accuracy']
+        else:
+            # Regression
+            model.add(Dense(1, activation='linear', name="Output"))
+            loss = 'mean_squared_error'
+            metrics = ['mae', 'mse']
         
         # Compile model
         optimizer = Adam(learning_rate=learning_rate)
         model.compile(
             optimizer=optimizer,
-            loss='mean_squared_error',
-            metrics=['mae', 'mse']
+            loss=loss,
+            metrics=metrics
         )
         
         # Print model summary
@@ -171,31 +197,58 @@ class BiLSTMModel:
         # Create figure
         plt.figure(figsize=(12, 5))
         
-        # Plot training & validation loss
-        plt.subplot(1, 2, 1)
-        plt.plot(self.history.history['loss'])
-        if 'val_loss' in self.history.history:
-            plt.plot(self.history.history['val_loss'])
-            plt.legend(['Train', 'Validation'])
+        if self.is_classifier:
+            # Plot training & validation accuracy
+            plt.subplot(1, 2, 1)
+            plt.plot(self.history.history['accuracy'])
+            if 'val_accuracy' in self.history.history:
+                plt.plot(self.history.history['val_accuracy'])
+                plt.legend(['Train', 'Validation'])
+            else:
+                plt.legend(['Train'])
+            plt.title('Model Accuracy')
+            plt.xlabel('Epoch')
+            plt.ylabel('Accuracy')
+            plt.grid(True)
+            
+            # Plot training & validation loss
+            plt.subplot(1, 2, 2)
+            plt.plot(self.history.history['loss'])
+            if 'val_loss' in self.history.history:
+                plt.plot(self.history.history['val_loss'])
+                plt.legend(['Train', 'Validation'])
+            else:
+                plt.legend(['Train'])
+            plt.title('Model Loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.grid(True)
         else:
-            plt.legend(['Train'])
-        plt.title('Model Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss (MSE)')
-        plt.grid(True)
-        
-        # Plot training & validation MAE
-        plt.subplot(1, 2, 2)
-        plt.plot(self.history.history['mae'])
-        if 'val_mae' in self.history.history:
-            plt.plot(self.history.history['val_mae'])
-            plt.legend(['Train', 'Validation'])
-        else:
-            plt.legend(['Train'])
-        plt.title('Model MAE')
-        plt.xlabel('Epoch')
-        plt.ylabel('Mean Absolute Error')
-        plt.grid(True)
+            # Plot training & validation loss
+            plt.subplot(1, 2, 1)
+            plt.plot(self.history.history['loss'])
+            if 'val_loss' in self.history.history:
+                plt.plot(self.history.history['val_loss'])
+                plt.legend(['Train', 'Validation'])
+            else:
+                plt.legend(['Train'])
+            plt.title('Model Loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss (MSE)')
+            plt.grid(True)
+            
+            # Plot training & validation MAE
+            plt.subplot(1, 2, 2)
+            plt.plot(self.history.history['mae'])
+            if 'val_mae' in self.history.history:
+                plt.plot(self.history.history['val_mae'])
+                plt.legend(['Train', 'Validation'])
+            else:
+                plt.legend(['Train'])
+            plt.title('Model MAE')
+            plt.xlabel('Epoch')
+            plt.ylabel('Mean Absolute Error')
+            plt.grid(True)
         
         plt.tight_layout()
         plt.savefig('output/bilstm/training_history.png')
@@ -220,42 +273,225 @@ class BiLSTMModel:
             print("Model not trained yet. Call train() first.")
             return None
         
-        # Evaluate the model
-        loss, mae, mse = self.model.evaluate(X_test, y_test, verbose=0)
+        # For classification model
+        if self.is_classifier:
+            # Get raw predictions
+            y_pred_raw = self.model.predict(X_test)
+            
+            # Convert to class predictions
+            if self.num_classes == 2:
+                # Binary classification
+                y_pred_classes = (y_pred_raw > 0.5).astype(int).flatten()
+            else:
+                # Multi-class classification
+                y_pred_classes = np.argmax(y_pred_raw, axis=1)
+            
+            # Calculate accuracy
+            accuracy = accuracy_score(y_test, y_pred_classes)
+            
+            # Generate classification report
+            report = classification_report(y_test, y_pred_classes, output_dict=True)
+            
+            # Generate confusion matrix
+            cm = confusion_matrix(y_test, y_pred_classes)
+            
+            # Visualize confusion matrix
+            self.visualize_confusion_matrix(cm)
+            
+            # Create metrics dictionary
+            metrics = {
+                'accuracy': accuracy,
+                'classification_report': report,
+                'confusion_matrix': cm
+            }
+            
+            # Print metrics
+            print("\nBI-LSTM Classification Model Evaluation Metrics:")
+            print(f"Accuracy: {accuracy:.4f}")
+            print("\nClassification Report:")
+            print(classification_report(y_test, y_pred_classes))
+            
+            # Save metrics to file
+            with open('output/bilstm/classification_metrics.txt', 'w') as f:
+                f.write("=== BI-LSTM Classification Model Evaluation Metrics ===\n\n")
+                f.write(f"Accuracy: {accuracy:.4f}\n\n")
+                f.write("Classification Report:\n")
+                f.write(classification_report(y_test, y_pred_classes))
+            
+            print("Saved classification metrics to output/bilstm/classification_metrics.txt")
+            
+            return metrics
+        else:
+            # For regression model
+            # Evaluate the model
+            loss, mae, mse = self.model.evaluate(X_test, y_test, verbose=0)
+            
+            # Calculate RMSE
+            rmse = np.sqrt(mse)
+            
+            # Make predictions
+            y_pred = self.model.predict(X_test)
+            
+            # Create evaluation metrics
+            metrics = {
+                'loss': loss,
+                'mae': mae,
+                'mse': mse,
+                'rmse': rmse
+            }
+            
+            # Print metrics
+            print("\nBI-LSTM Model Evaluation Metrics:")
+            print(f"Mean Squared Error (MSE): {mse:.4f}")
+            print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
+            print(f"Mean Absolute Error (MAE): {mae:.4f}")
+            
+            # Visualize predictions
+            self.visualize_predictions(y_test, y_pred)
+            
+            # Save metrics to file
+            with open('output/bilstm/evaluation_metrics.txt', 'w') as f:
+                f.write("=== BI-LSTM Model Evaluation Metrics ===\n\n")
+                f.write(f"Mean Squared Error (MSE): {mse:.4f}\n")
+                f.write(f"Root Mean Squared Error (RMSE): {rmse:.4f}\n")
+                f.write(f"Mean Absolute Error (MAE): {mae:.4f}\n")
+            
+            print("Saved evaluation metrics to output/bilstm/evaluation_metrics.txt")
+            
+            return metrics
+    
+    def visualize_confusion_matrix(self, cm, class_names=None):
+        """
+        Visualize confusion matrix with a more stylish design
         
-        # Calculate RMSE
-        rmse = np.sqrt(mse)
+        Args:
+            cm (numpy.ndarray): Confusion matrix
+            class_names (list): List of class names
+        """
+        # If class names not provided, use numeric indices
+        if class_names is None:
+            if hasattr(self, 'grade_encoder') and self.grade_encoder is not None:
+                class_names = self.grade_encoder.classes_
+            else:
+                class_names = [str(i) for i in range(cm.shape[0])]
         
-        # Make predictions
-        y_pred = self.model.predict(X_test)
+        # Check if binary classification (2x2 matrix)
+        if cm.shape[0] == 2:
+            # For binary classification, use the stylish TP, FP, TN, FN format
+            plt.figure(figsize=(10, 8))
+            
+            # Extract values
+            tn, fp = cm[0, 0], cm[0, 1]
+            fn, tp = cm[1, 0], cm[1, 1]
+            
+            # Create a 2x2 grid for the confusion matrix
+            ax = plt.subplot(111)
+            
+            # Define colors
+            tp_color = '#1e7b5e'  # Dark green
+            tn_color = '#1e7b5e'  # Dark green
+            fp_color = '#e15a4c'  # Red
+            fn_color = '#e15a4c'  # Red
+            
+            # Remove axes
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            
+            # Create the 2x2 grid with custom patches
+            # True Positive (top-left)
+            tp_rect = plt.Rectangle((0, 1), 1, 1, fill=True, color=tp_color, alpha=0.8)
+            ax.add_patch(tp_rect)
+            ax.text(0.5, 1.5, 'TRUE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 1.25, str(tp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Negative (top-right)
+            fn_rect = plt.Rectangle((1, 1), 1, 1, fill=True, color=fn_color, alpha=0.8)
+            ax.add_patch(fn_rect)
+            ax.text(1.5, 1.5, 'FALSE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 1.25, str(fn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Positive (bottom-left)
+            fp_rect = plt.Rectangle((0, 0), 1, 1, fill=True, color=fp_color, alpha=0.8)
+            ax.add_patch(fp_rect)
+            ax.text(0.5, 0.5, 'FALSE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 0.25, str(fp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # True Negative (bottom-right)
+            tn_rect = plt.Rectangle((1, 0), 1, 1, fill=True, color=tn_color, alpha=0.8)
+            ax.add_patch(tn_rect)
+            ax.text(1.5, 0.5, 'TRUE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 0.25, str(tn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # Add labels
+            plt.text(1.0, 2.1, 'PREDICTED', ha='center', va='center', fontsize=20, fontweight='bold')
+            plt.text(-0.3, 1.0, 'ACTUAL', ha='center', va='center', rotation=90, fontsize=20, fontweight='bold')
+            
+            plt.text(0.5, 2.0, 'Positive', ha='center', va='center', fontsize=16)
+            plt.text(1.5, 2.0, 'Negative', ha='center', va='center', fontsize=16)
+            plt.text(-0.2, 1.5, 'Positive', ha='center', va='center', rotation=90, fontsize=16)
+            plt.text(-0.2, 0.5, 'Negative', ha='center', va='center', rotation=90, fontsize=16)
+            
+            # Set limits and remove ticks
+            ax.set_xlim(-0.5, 2.5)
+            ax.set_ylim(-0.5, 2.5)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+            plt.title('Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            
+        else:
+            # For multi-class, use a heatmap but with improved styling
+            plt.figure(figsize=(12, 10))
+            
+            # Create a DataFrame for better labeling
+            cm_df = pd.DataFrame(cm, index=class_names, columns=class_names)
+            
+            # Normalize the confusion matrix
+            cm_norm = cm_df.astype('float') / cm_df.sum(axis=1).values.reshape(-1, 1)
+            
+            # Create a mask for the diagonal (correctly classified)
+            mask = np.zeros_like(cm, dtype=bool)
+            np.fill_diagonal(mask, True)
+            
+            # Create a custom colormap: green for diagonal, red for off-diagonal
+            cmap = plt.cm.Reds
+            
+            # Plot the heatmap with improved styling
+            ax = plt.subplot(111)
+            
+            # Plot the correctly classified instances (diagonal) in green
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Greens', mask=~mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Plot the misclassified instances (off-diagonal) in red
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Reds', mask=mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Add labels
+            plt.title('Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            plt.ylabel('True Label', fontsize=16, fontweight='bold')
+            plt.xlabel('Predicted Label', fontsize=16, fontweight='bold')
+            
+            # Rotate the tick labels and set alignment
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor", fontsize=12)
+            plt.setp(ax.get_yticklabels(), rotation=0, fontsize=12)
+            
+            # Add text with accuracy information
+            accuracy = np.trace(cm) / np.sum(cm)
+            plt.figtext(0.5, 0.01, f'Accuracy: {accuracy:.2%}', ha='center', fontsize=14, 
+                       bbox={"facecolor":"lightgrey", "alpha":0.5, "pad":5})
         
-        # Create evaluation metrics
-        metrics = {
-            'loss': loss,
-            'mae': mae,
-            'mse': mse,
-            'rmse': rmse
-        }
+        plt.tight_layout()
         
-        # Print metrics
-        print("\nBI-LSTM Model Evaluation Metrics:")
-        print(f"Mean Squared Error (MSE): {mse:.4f}")
-        print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
-        print(f"Mean Absolute Error (MAE): {mae:.4f}")
+        # Save figure
+        plt.savefig('output/bilstm/confusion_matrix.png', dpi=300, bbox_inches='tight')
+        plt.close()
         
-        # Visualize predictions
-        self.visualize_predictions(y_test, y_pred)
-        
-        # Save metrics to file
-        with open('output/bilstm/evaluation_metrics.txt', 'w') as f:
-            f.write("=== BI-LSTM Model Evaluation Metrics ===\n\n")
-            f.write(f"Mean Squared Error (MSE): {mse:.4f}\n")
-            f.write(f"Root Mean Squared Error (RMSE): {rmse:.4f}\n")
-            f.write(f"Mean Absolute Error (MAE): {mae:.4f}\n")
-        
-        print("Saved evaluation metrics to output/bilstm/evaluation_metrics.txt")
-        
-        return metrics
+        print("Saved confusion matrix visualization to output/bilstm/confusion_matrix.png")
     
     def visualize_predictions(self, y_true, y_pred):
         """
@@ -319,7 +555,13 @@ class BiLSTMModel:
         # Make predictions
         predictions = self.model.predict(X)
         
-        return predictions.flatten()
+        # For classification, convert to class predictions if needed
+        if self.is_classifier and self.num_classes > 2:
+            predictions = np.argmax(predictions, axis=1)
+        elif self.is_classifier:
+            predictions = (predictions > 0.5).astype(int).flatten()
+            
+        return predictions
 
 
 # For testing the module independently

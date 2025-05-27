@@ -1,0 +1,64 @@
+# HABITOR SYSTEM CODE SUMMARY
+
+## main.py
+- **HabitorPipeline class**: Coordinates the entire ML pipeline with the following methods:
+  - `__init__`: Initializes the pipeline with data path and classification mode flag
+  - `collect_data`: Loads data from CSV/Excel files
+  - `visualize_data`: Creates exploratory visualizations of the dataset
+  - `preprocess_data`: Cleans data and converts CGPA to letter grades in classification mode
+  - `vectorize_features`: Converts categorical features to numerical representations
+  - `train_bilstm_model`: Builds and trains the BI-LSTM neural network
+  - `train_gradient_boosting_model`: Builds and trains the Gradient Boosting model
+  - `future_prediction`: Makes predictions using both models and an ensemble approach
+  - `model_evaluation`: Compares model performance and generates reports
+  - `run_full_pipeline`: Executes all steps in sequence
+
+## bilstm_model.py
+- **BiLSTMModel class**: Implements a bidirectional LSTM neural network:
+  - `build_model`: Creates a stacked BI-LSTM architecture with dropout layers
+  - `train`: Trains the model with early stopping and checkpointing
+  - `evaluate`: Assesses model performance on test data
+  - `visualize_confusion_matrix`: Generates stylized confusion matrices
+  - `visualize_predictions`: Creates prediction vs. actual plots
+  - `predict`: Makes predictions on new data
+
+## gradient_boosting_model.py
+- **GradientBoostingModel class**: Implements Gradient Boosting:
+  - `build_model`: Creates a Gradient Boosting regressor or classifier
+  - `hyperparameter_tuning`: Performs grid search for optimal parameters
+  - `train`: Trains the model and visualizes feature importance
+  - `evaluate`: Assesses model performance on test data
+  - `visualize_confusion_matrix`: Generates stylized confusion matrices
+  - `visualize_predictions`: Creates prediction vs. actual plots
+
+## preprocessing.py
+- **DataPreprocessor class**: Prepares data for modeling:
+  - `preprocess_data`: Handles missing values, encoding, and scaling
+  - `split_data`: Creates train/test splits
+  - `convert_cgpa_to_letter_grade`: Transforms numerical grades to letters (A+, A, B+, etc.)
+
+## count_vectorization.py
+- **FeatureVectorizer class**: Converts categorical features to numerical:
+  - `vectorize_features`: Applies count vectorization or one-hot encoding
+  - `vectorize_and_combine`: Combines vectorized features with numerical ones
+
+## future_prediction.py
+- **FuturePredictor class**: Makes and evaluates predictions:
+  - `predict_with_bilstm`: Gets predictions from BI-LSTM model
+  - `predict_with_gradient`: Gets predictions from Gradient Boosting model
+  - `predict_ensemble`: Combines predictions from both models
+  - `evaluate_predictions`: Calculates metrics for all models
+  - `visualize_confusion_matrix`: Creates stylized confusion matrices
+  - `generate_prediction_report`: Outputs a comprehensive report
+
+## model_evaluation.py
+- **ModelEvaluator class**: Compares multiple models:
+  - `add_model`: Registers a model for evaluation
+  - `predict_all`: Makes predictions with all models
+  - `evaluate_all`: Calculates metrics for all models
+  - `visualize_confusion_matrix`: Creates stylized confusion matrices
+  - `visualize_model_comparison`: Generates comparative visualizations
+  - `generate_evaluation_report`: Creates a detailed report
+
+# Recent Updates
+The confusion matrix visualization was enhanced across all files to create clearer, more visually appealing confusion matrices that highlight true positives/negatives in green and false positives/negatives in red. 

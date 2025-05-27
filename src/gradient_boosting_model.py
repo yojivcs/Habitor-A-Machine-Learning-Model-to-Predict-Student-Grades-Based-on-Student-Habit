@@ -2,20 +2,25 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV, learning_curve
 import os
 import pickle
 
 class GradientBoostingModel:
-    def __init__(self):
+    def __init__(self, is_classifier=False):
         """
         Initialize the Gradient Boosting model
+        
+        Args:
+            is_classifier (bool): Whether to use a classifier instead of regressor
         """
         self.model = None
         self.best_params = None
         self.feature_importances = None
+        self.is_classifier = is_classifier
         
         # Create output directory if it doesn't exist
         os.makedirs('output/gradient_boosting', exist_ok=True)
@@ -31,17 +36,26 @@ class GradientBoostingModel:
             random_state (int): Random seed for reproducibility
             
         Returns:
-            GradientBoostingRegressor: Built model
+            GradientBoostingRegressor or GradientBoostingClassifier: Built model
         """
         print("Building Gradient Boosting model...")
+        print(f"Model type: {'Classification' if self.is_classifier else 'Regression'}")
         
         # Create model
-        self.model = GradientBoostingRegressor(
-            n_estimators=n_estimators,
-            learning_rate=learning_rate,
-            max_depth=max_depth,
-            random_state=random_state
-        )
+        if self.is_classifier:
+            self.model = GradientBoostingClassifier(
+                n_estimators=n_estimators,
+                learning_rate=learning_rate,
+                max_depth=max_depth,
+                random_state=random_state
+            )
+        else:
+            self.model = GradientBoostingRegressor(
+                n_estimators=n_estimators,
+                learning_rate=learning_rate,
+                max_depth=max_depth,
+                random_state=random_state
+            )
         
         # Save parameters
         self.best_params = {
@@ -53,7 +67,7 @@ class GradientBoostingModel:
         
         # Save model configuration
         with open('output/gradient_boosting/model_config.txt', 'w') as f:
-            f.write("=== Gradient Boosting Model Configuration ===\n\n")
+            f.write(f"=== Gradient Boosting {'Classification' if self.is_classifier else 'Regression'} Model Configuration ===\n\n")
             for param, value in self.best_params.items():
                 f.write(f"{param}: {value}\n")
         
@@ -83,14 +97,19 @@ class GradientBoostingModel:
         }
         
         # Create base model
-        model = GradientBoostingRegressor(random_state=42)
+        if self.is_classifier:
+            model = GradientBoostingClassifier(random_state=42)
+            scoring = 'accuracy'
+        else:
+            model = GradientBoostingRegressor(random_state=42)
+            scoring = 'neg_mean_squared_error'
         
         # Create grid search
         grid_search = GridSearchCV(
             estimator=model,
             param_grid=param_grid,
             cv=cv,
-            scoring='neg_mean_squared_error',
+            scoring=scoring,
             verbose=1,
             n_jobs=-1
         )
@@ -102,17 +121,26 @@ class GradientBoostingModel:
         self.best_params = grid_search.best_params_
         
         # Create model with best parameters
-        self.model = GradientBoostingRegressor(
-            n_estimators=self.best_params['n_estimators'],
-            learning_rate=self.best_params['learning_rate'],
-            max_depth=self.best_params['max_depth'],
-            subsample=self.best_params['subsample'],
-            random_state=42
-        )
+        if self.is_classifier:
+            self.model = GradientBoostingClassifier(
+                n_estimators=self.best_params['n_estimators'],
+                learning_rate=self.best_params['learning_rate'],
+                max_depth=self.best_params['max_depth'],
+                subsample=self.best_params['subsample'],
+                random_state=42
+            )
+        else:
+            self.model = GradientBoostingRegressor(
+                n_estimators=self.best_params['n_estimators'],
+                learning_rate=self.best_params['learning_rate'],
+                max_depth=self.best_params['max_depth'],
+                subsample=self.best_params['subsample'],
+                random_state=42
+            )
         
         # Save best parameters
         with open('output/gradient_boosting/best_params.txt', 'w') as f:
-            f.write("=== Gradient Boosting Best Parameters ===\n\n")
+            f.write(f"=== Gradient Boosting {'Classification' if self.is_classifier else 'Regression'} Best Parameters ===\n\n")
             for param, value in self.best_params.items():
                 f.write(f"{param}: {value}\n")
         
@@ -130,7 +158,7 @@ class GradientBoostingModel:
             y_train (numpy.ndarray): Training target
             
         Returns:
-            GradientBoostingRegressor: Trained model
+            GradientBoostingRegressor or GradientBoostingClassifier: Trained model
         """
         print("Training Gradient Boosting model...")
         
@@ -214,17 +242,29 @@ class GradientBoostingModel:
         print("Generating learning curve...")
         
         # Calculate learning curve
+        if self.is_classifier:
+            scoring = 'accuracy'
+        else:
+            scoring = 'neg_mean_squared_error'
+            
         train_sizes, train_scores, test_scores = learning_curve(
             self.model, X_train, y_train,
             train_sizes=np.linspace(0.1, 1.0, 10),
-            cv=cv, scoring='neg_mean_squared_error'
+            cv=cv, scoring=scoring
         )
         
         # Calculate mean and standard deviation
-        train_mean = -np.mean(train_scores, axis=1)
+        train_mean = np.mean(train_scores, axis=1)
         train_std = np.std(train_scores, axis=1)
-        test_mean = -np.mean(test_scores, axis=1)
+        test_mean = np.mean(test_scores, axis=1)
         test_std = np.std(test_scores, axis=1)
+        
+        # For regression, we need to negate the scores since they're negative MSE
+        if not self.is_classifier:
+            train_mean = -train_mean
+            train_std = train_std
+            test_mean = -test_mean
+            test_std = test_std
         
         # Plot learning curve
         plt.figure(figsize=(10, 6))
@@ -235,7 +275,12 @@ class GradientBoostingModel:
         plt.plot(train_sizes, test_mean, 'o-', color="g", label="Cross-validation score")
         plt.title('Learning Curve')
         plt.xlabel('Training Size')
-        plt.ylabel('Mean Squared Error')
+        
+        if self.is_classifier:
+            plt.ylabel('Accuracy')
+        else:
+            plt.ylabel('Mean Squared Error')
+            
         plt.legend(loc="best")
         plt.tight_layout()
         
@@ -265,41 +310,205 @@ class GradientBoostingModel:
         # Make predictions
         y_pred = self.model.predict(X_test)
         
-        # Calculate metrics
-        mse = mean_squared_error(y_test, y_pred)
-        rmse = np.sqrt(mse)
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        
-        # Create metrics dictionary
-        metrics = {
-            'mse': mse,
-            'rmse': rmse,
-            'mae': mae,
-            'r2': r2
-        }
-        
-        # Print metrics
-        print("\nGradient Boosting Model Evaluation Metrics:")
-        print(f"Mean Squared Error (MSE): {mse:.4f}")
-        print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
-        print(f"Mean Absolute Error (MAE): {mae:.4f}")
-        print(f"R-squared (R2): {r2:.4f}")
-        
-        # Visualize predictions
-        self.visualize_predictions(y_test, y_pred)
-        
-        # Save metrics to file
-        with open('output/gradient_boosting/evaluation_metrics.txt', 'w') as f:
-            f.write("=== Gradient Boosting Model Evaluation Metrics ===\n\n")
-            f.write(f"Mean Squared Error (MSE): {mse:.4f}\n")
-            f.write(f"Root Mean Squared Error (RMSE): {rmse:.4f}\n")
-            f.write(f"Mean Absolute Error (MAE): {mae:.4f}\n")
-            f.write(f"R-squared (R2): {r2:.4f}\n")
-        
-        print("Saved evaluation metrics to output/gradient_boosting/evaluation_metrics.txt")
+        if self.is_classifier:
+            # Calculate classification metrics
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+            cm = confusion_matrix(y_test, y_pred)
+            
+            # Create metrics dictionary
+            metrics = {
+                'accuracy': accuracy,
+                'classification_report': report,
+                'confusion_matrix': cm
+            }
+            
+            # Print metrics
+            print("\nGradient Boosting Classification Model Evaluation Metrics:")
+            print(f"Accuracy: {accuracy:.4f}")
+            print("\nClassification Report:")
+            print(classification_report(y_test, y_pred))
+            
+            # Visualize confusion matrix
+            self.visualize_confusion_matrix(cm)
+            
+            # Save metrics to file
+            with open('output/gradient_boosting/classification_metrics.txt', 'w') as f:
+                f.write("=== Gradient Boosting Classification Model Evaluation Metrics ===\n\n")
+                f.write(f"Accuracy: {accuracy:.4f}\n\n")
+                f.write("Classification Report:\n")
+                f.write(classification_report(y_test, y_pred))
+            
+            print("Saved classification metrics to output/gradient_boosting/classification_metrics.txt")
+        else:
+            # Calculate regression metrics
+            mse = mean_squared_error(y_test, y_pred)
+            rmse = np.sqrt(mse)
+            mae = mean_absolute_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
+            
+            # Create metrics dictionary
+            metrics = {
+                'mse': mse,
+                'rmse': rmse,
+                'mae': mae,
+                'r2': r2
+            }
+            
+            # Print metrics
+            print("\nGradient Boosting Model Evaluation Metrics:")
+            print(f"Mean Squared Error (MSE): {mse:.4f}")
+            print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
+            print(f"Mean Absolute Error (MAE): {mae:.4f}")
+            print(f"R-squared (R2): {r2:.4f}")
+            
+            # Visualize predictions
+            self.visualize_predictions(y_test, y_pred)
+            
+            # Save metrics to file
+            with open('output/gradient_boosting/evaluation_metrics.txt', 'w') as f:
+                f.write("=== Gradient Boosting Model Evaluation Metrics ===\n\n")
+                f.write(f"Mean Squared Error (MSE): {mse:.4f}\n")
+                f.write(f"Root Mean Squared Error (RMSE): {rmse:.4f}\n")
+                f.write(f"Mean Absolute Error (MAE): {mae:.4f}\n")
+                f.write(f"R-squared (R2): {r2:.4f}\n")
+            
+            print("Saved evaluation metrics to output/gradient_boosting/evaluation_metrics.txt")
         
         return metrics
+    
+    def visualize_confusion_matrix(self, cm, class_names=None):
+        """
+        Visualize confusion matrix with a more stylish design
+        
+        Args:
+            cm (numpy.ndarray): Confusion matrix
+            class_names (list): List of class names
+        """
+        # If class names not provided, use numeric indices
+        if class_names is None:
+            if hasattr(self, 'grade_encoder') and self.grade_encoder is not None:
+                class_names = self.grade_encoder.classes_
+            else:
+                class_names = [str(i) for i in range(cm.shape[0])]
+        
+        # Check if binary classification (2x2 matrix)
+        if cm.shape[0] == 2:
+            # For binary classification, use the stylish TP, FP, TN, FN format
+            plt.figure(figsize=(10, 8))
+            
+            # Extract values
+            tn, fp = cm[0, 0], cm[0, 1]
+            fn, tp = cm[1, 0], cm[1, 1]
+            
+            # Create a 2x2 grid for the confusion matrix
+            ax = plt.subplot(111)
+            
+            # Define colors
+            tp_color = '#1e7b5e'  # Dark green
+            tn_color = '#1e7b5e'  # Dark green
+            fp_color = '#e15a4c'  # Red
+            fn_color = '#e15a4c'  # Red
+            
+            # Remove axes
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            
+            # Create the 2x2 grid with custom patches
+            # True Positive (top-left)
+            tp_rect = plt.Rectangle((0, 1), 1, 1, fill=True, color=tp_color, alpha=0.8)
+            ax.add_patch(tp_rect)
+            ax.text(0.5, 1.5, 'TRUE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 1.25, str(tp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Negative (top-right)
+            fn_rect = plt.Rectangle((1, 1), 1, 1, fill=True, color=fn_color, alpha=0.8)
+            ax.add_patch(fn_rect)
+            ax.text(1.5, 1.5, 'FALSE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 1.25, str(fn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Positive (bottom-left)
+            fp_rect = plt.Rectangle((0, 0), 1, 1, fill=True, color=fp_color, alpha=0.8)
+            ax.add_patch(fp_rect)
+            ax.text(0.5, 0.5, 'FALSE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 0.25, str(fp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # True Negative (bottom-right)
+            tn_rect = plt.Rectangle((1, 0), 1, 1, fill=True, color=tn_color, alpha=0.8)
+            ax.add_patch(tn_rect)
+            ax.text(1.5, 0.5, 'TRUE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 0.25, str(tn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # Add labels
+            plt.text(1.0, 2.1, 'PREDICTED', ha='center', va='center', fontsize=20, fontweight='bold')
+            plt.text(-0.3, 1.0, 'ACTUAL', ha='center', va='center', rotation=90, fontsize=20, fontweight='bold')
+            
+            plt.text(0.5, 2.0, 'Positive', ha='center', va='center', fontsize=16)
+            plt.text(1.5, 2.0, 'Negative', ha='center', va='center', fontsize=16)
+            plt.text(-0.2, 1.5, 'Positive', ha='center', va='center', rotation=90, fontsize=16)
+            plt.text(-0.2, 0.5, 'Negative', ha='center', va='center', rotation=90, fontsize=16)
+            
+            # Set limits and remove ticks
+            ax.set_xlim(-0.5, 2.5)
+            ax.set_ylim(-0.5, 2.5)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+            plt.title('Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            
+        else:
+            # For multi-class, use a heatmap but with improved styling
+            plt.figure(figsize=(12, 10))
+            
+            # Create a DataFrame for better labeling
+            cm_df = pd.DataFrame(cm, index=class_names, columns=class_names)
+            
+            # Normalize the confusion matrix
+            cm_norm = cm_df.astype('float') / cm_df.sum(axis=1).values.reshape(-1, 1)
+            
+            # Create a mask for the diagonal (correctly classified)
+            mask = np.zeros_like(cm, dtype=bool)
+            np.fill_diagonal(mask, True)
+            
+            # Create a custom colormap: green for diagonal, red for off-diagonal
+            cmap = plt.cm.Reds
+            
+            # Plot the heatmap with improved styling
+            ax = plt.subplot(111)
+            
+            # Plot the correctly classified instances (diagonal) in green
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Greens', mask=~mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Plot the misclassified instances (off-diagonal) in red
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Reds', mask=mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Add labels
+            plt.title('Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            plt.ylabel('True Label', fontsize=16, fontweight='bold')
+            plt.xlabel('Predicted Label', fontsize=16, fontweight='bold')
+            
+            # Rotate the tick labels and set alignment
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor", fontsize=12)
+            plt.setp(ax.get_yticklabels(), rotation=0, fontsize=12)
+            
+            # Add text with accuracy information
+            accuracy = np.trace(cm) / np.sum(cm)
+            plt.figtext(0.5, 0.01, f'Accuracy: {accuracy:.2%}', ha='center', fontsize=14, 
+                       bbox={"facecolor":"lightgrey", "alpha":0.5, "pad":5})
+        
+        plt.tight_layout()
+        
+        # Save figure
+        plt.savefig('output/gradient_boosting/confusion_matrix.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print("Saved confusion matrix visualization to output/gradient_boosting/confusion_matrix.png")
     
     def visualize_predictions(self, y_true, y_pred):
         """
@@ -407,7 +616,7 @@ if __name__ == "__main__":
         X_test_dense = X_test_vectorized
     
     # Build and train Gradient Boosting model
-    gb_model = GradientBoostingModel()
+    gb_model = GradientBoostingModel(is_classifier=False)
     gb_model.build_model()
     gb_model.train(X_train_dense, y_train)
     

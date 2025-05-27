@@ -193,21 +193,127 @@ class ModelEvaluator:
     
     def visualize_confusion_matrix(self, cm, model_name):
         """
-        Visualize confusion matrix
+        Visualize confusion matrix with a more stylish design
         
         Args:
             cm (numpy.ndarray): Confusion matrix
             model_name (str): Name of the model
         """
-        plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-        plt.title(f'Confusion Matrix - {model_name}')
-        plt.ylabel('True Label')
-        plt.xlabel('Predicted Label')
+        # Check if binary classification (2x2 matrix)
+        if cm.shape[0] == 2:
+            # For binary classification, use the stylish TP, FP, TN, FN format
+            plt.figure(figsize=(10, 8))
+            
+            # Extract values
+            tn, fp = cm[0, 0], cm[0, 1]
+            fn, tp = cm[1, 0], cm[1, 1]
+            
+            # Create a 2x2 grid for the confusion matrix
+            ax = plt.subplot(111)
+            
+            # Define colors
+            tp_color = '#1e7b5e'  # Dark green
+            tn_color = '#1e7b5e'  # Dark green
+            fp_color = '#e15a4c'  # Red
+            fn_color = '#e15a4c'  # Red
+            
+            # Remove axes
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            
+            # Create the 2x2 grid with custom patches
+            # True Positive (top-left)
+            tp_rect = plt.Rectangle((0, 1), 1, 1, fill=True, color=tp_color, alpha=0.8)
+            ax.add_patch(tp_rect)
+            ax.text(0.5, 1.5, 'TRUE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 1.25, str(tp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Negative (top-right)
+            fn_rect = plt.Rectangle((1, 1), 1, 1, fill=True, color=fn_color, alpha=0.8)
+            ax.add_patch(fn_rect)
+            ax.text(1.5, 1.5, 'FALSE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 1.25, str(fn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # False Positive (bottom-left)
+            fp_rect = plt.Rectangle((0, 0), 1, 1, fill=True, color=fp_color, alpha=0.8)
+            ax.add_patch(fp_rect)
+            ax.text(0.5, 0.5, 'FALSE POSITIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(0.5, 0.25, str(fp), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # True Negative (bottom-right)
+            tn_rect = plt.Rectangle((1, 0), 1, 1, fill=True, color=tn_color, alpha=0.8)
+            ax.add_patch(tn_rect)
+            ax.text(1.5, 0.5, 'TRUE NEGATIVE', ha='center', va='center', color='white', fontsize=18, fontweight='bold')
+            ax.text(1.5, 0.25, str(tn), ha='center', va='center', color='white', fontsize=24, fontweight='bold')
+            
+            # Add labels
+            plt.text(1.0, 2.1, 'PREDICTED', ha='center', va='center', fontsize=20, fontweight='bold')
+            plt.text(-0.3, 1.0, 'ACTUAL', ha='center', va='center', rotation=90, fontsize=20, fontweight='bold')
+            
+            plt.text(0.5, 2.0, 'Positive', ha='center', va='center', fontsize=16)
+            plt.text(1.5, 2.0, 'Negative', ha='center', va='center', fontsize=16)
+            plt.text(-0.2, 1.5, 'Positive', ha='center', va='center', rotation=90, fontsize=16)
+            plt.text(-0.2, 0.5, 'Negative', ha='center', va='center', rotation=90, fontsize=16)
+            
+            # Set limits and remove ticks
+            ax.set_xlim(-0.5, 2.5)
+            ax.set_ylim(-0.5, 2.5)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+            plt.title(f'{model_name} Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            
+        else:
+            # For multi-class, use a heatmap but with improved styling
+            plt.figure(figsize=(12, 10))
+            
+            # Create a DataFrame for better labeling
+            class_names = [str(i) for i in range(cm.shape[0])]
+            cm_df = pd.DataFrame(cm, index=class_names, columns=class_names)
+            
+            # Normalize the confusion matrix
+            cm_norm = cm_df.astype('float') / cm_df.sum(axis=1).values.reshape(-1, 1)
+            
+            # Create a mask for the diagonal (correctly classified)
+            mask = np.zeros_like(cm, dtype=bool)
+            np.fill_diagonal(mask, True)
+            
+            # Create a custom colormap: green for diagonal, red for off-diagonal
+            cmap = plt.cm.Reds
+            
+            # Plot the heatmap with improved styling
+            ax = plt.subplot(111)
+            
+            # Plot the correctly classified instances (diagonal) in green
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Greens', mask=~mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Plot the misclassified instances (off-diagonal) in red
+            sns.heatmap(cm_df, annot=True, fmt="d", cmap='Reds', mask=mask,
+                       linewidths=1, linecolor='white', cbar=False,
+                       annot_kws={"size": 14, "weight": "bold"}, ax=ax)
+            
+            # Add labels
+            plt.title(f'{model_name} Confusion Matrix', fontsize=22, fontweight='bold', pad=20)
+            plt.ylabel('True Label', fontsize=16, fontweight='bold')
+            plt.xlabel('Predicted Label', fontsize=16, fontweight='bold')
+            
+            # Rotate the tick labels and set alignment
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor", fontsize=12)
+            plt.setp(ax.get_yticklabels(), rotation=0, fontsize=12)
+            
+            # Add text with accuracy information
+            accuracy = np.trace(cm) / np.sum(cm)
+            plt.figtext(0.5, 0.01, f'Accuracy: {accuracy:.2%}', ha='center', fontsize=14, 
+                       bbox={"facecolor":"lightgrey", "alpha":0.5, "pad":5})
+        
         plt.tight_layout()
         
         # Save figure
-        plt.savefig(f'output/evaluation/confusion_matrix_{model_name}.png')
+        plt.savefig(f'output/evaluation/confusion_matrix_{model_name}.png', dpi=300, bbox_inches='tight')
         plt.close()
         
         print(f"Saved confusion matrix visualization to output/evaluation/confusion_matrix_{model_name}.png")
