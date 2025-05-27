@@ -1,6 +1,6 @@
 # HABITOR SYSTEM CODE SUMMARY
 
-## main.py
+## main.py (src/main.py)
 - **HabitorPipeline class**: Coordinates the entire ML pipeline with the following methods:
   - `__init__`: Initializes the pipeline with data path and classification mode flag
   - `collect_data`: Loads data from CSV/Excel files
@@ -13,7 +13,7 @@
   - `model_evaluation`: Compares model performance and generates reports
   - `run_full_pipeline`: Executes all steps in sequence
 
-## bilstm_model.py
+## bilstm_model.py (formerly lstm_model.py)
 - **BiLSTMModel class**: Implements a bidirectional LSTM neural network:
   - `build_model`: Creates a stacked BI-LSTM architecture with dropout layers
   - `train`: Trains the model with early stopping and checkpointing
@@ -21,6 +21,8 @@
   - `visualize_confusion_matrix`: Generates stylized confusion matrices
   - `visualize_predictions`: Creates prediction vs. actual plots
   - `predict`: Makes predictions on new data
+  - `save_model`: Saves the trained model to disk
+  - `load_model`: Loads a pre-trained model from disk
 
 ## gradient_boosting_model.py
 - **GradientBoostingModel class**: Implements Gradient Boosting:
@@ -30,17 +32,37 @@
   - `evaluate`: Assesses model performance on test data
   - `visualize_confusion_matrix`: Generates stylized confusion matrices
   - `visualize_predictions`: Creates prediction vs. actual plots
+  - `save_model`: Saves the trained model to disk
+  - `load_model`: Loads a pre-trained model from disk
+
+## data_collection.py
+- **DataCollector class**: Handles data loading and initial examination:
+  - `load_data`: Loads data from CSV/Excel files
+  - `get_data_summary`: Generates summary statistics of the dataset
+  - `check_missing_values`: Identifies missing values in the dataset
+  - `display_sample_data`: Shows a sample of the dataset
+
+## data_visualization.py
+- **DataVisualizer class**: Creates data visualizations:
+  - `visualize_correlation_matrix`: Generates correlation heatmaps
+  - `visualize_distribution`: Creates distribution plots for features
+  - `visualize_feature_relationships`: Shows relationships between features
+  - `visualize_all`: Creates and saves all visualizations
 
 ## preprocessing.py
 - **DataPreprocessor class**: Prepares data for modeling:
   - `preprocess_data`: Handles missing values, encoding, and scaling
   - `split_data`: Creates train/test splits
   - `convert_cgpa_to_letter_grade`: Transforms numerical grades to letters (A+, A, B+, etc.)
+  - `handle_missing_values`: Fills or removes missing values
+  - `encode_categorical_features`: Encodes categorical features
+  - `scale_numerical_features`: Normalizes numerical features
 
 ## count_vectorization.py
 - **FeatureVectorizer class**: Converts categorical features to numerical:
   - `vectorize_features`: Applies count vectorization or one-hot encoding
   - `vectorize_and_combine`: Combines vectorized features with numerical ones
+  - `get_feature_names`: Returns names of the vectorized features
 
 ## future_prediction.py
 - **FuturePredictor class**: Makes and evaluates predictions:
@@ -50,6 +72,7 @@
   - `evaluate_predictions`: Calculates metrics for all models
   - `visualize_confusion_matrix`: Creates stylized confusion matrices
   - `generate_prediction_report`: Outputs a comprehensive report
+  - `save_predictions`: Saves predictions to disk for later analysis
 
 ## model_evaluation.py
 - **ModelEvaluator class**: Compares multiple models:
@@ -59,6 +82,26 @@
   - `visualize_confusion_matrix`: Creates stylized confusion matrices
   - `visualize_model_comparison`: Generates comparative visualizations
   - `generate_evaluation_report`: Creates a detailed report
+  - `calculate_metrics`: Computes performance metrics for models
+  - `save_evaluation_results`: Saves evaluation results to disk
+
+## root/main.py
+- Entry point for the ML pipeline
+- Imports the main function from src/main.py
+- Sets up the Python path to include the src directory
+
+## app.py
+- **Streamlit web application**:
+  - Sets up the navigation and UI components
+  - Includes tabs for prediction and data analysis
+  - Loads and utilizes the trained ML models
+  - Provides interactive visualization tools
+  - Allows users to input their data for predictions
 
 # Recent Updates
-The confusion matrix visualization was enhanced across all files to create clearer, more visually appealing confusion matrices that highlight true positives/negatives in green and false positives/negatives in red. 
+1. **Renamed Files**: lstm_model.py has been renamed to bilstm_model.py to better reflect the bidirectional nature of the LSTM model
+2. **Enhanced Visualizations**: Improved confusion matrix visualization across all files with clearer color coding and annotations
+3. **Model Saving/Loading**: Added functionality to save and load trained models
+4. **Expanded Evaluation**: Added more comprehensive evaluation metrics and comparative visualizations
+5. **Streamlined Pipeline**: Optimized the data flow between pipeline components for better performance
+6. **Documentation**: Improved code documentation and added detailed comments throughout the codebase 

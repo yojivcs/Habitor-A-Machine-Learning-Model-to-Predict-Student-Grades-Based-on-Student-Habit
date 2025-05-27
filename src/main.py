@@ -6,16 +6,34 @@ import tensorflow as tf
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import time
 import argparse
+import warnings
+
+# Suppress warnings
+warnings.filterwarnings('ignore')
+
+# Set TensorFlow logging level
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 0=all, 1=INFO, 2=WARNING, 3=ERROR
 
 # Import all our modules
-from data_collection import DataCollector
-from data_visualization import DataVisualizer
-from preprocessing import DataPreprocessor, convert_cgpa_to_letter_grade
-from count_vectorization import FeatureVectorizer
-from bilstm_model import BiLSTMModel
-from gradient_boosting_model import GradientBoostingModel
-from future_prediction import FuturePredictor
-from model_evaluation import ModelEvaluator
+try:
+    from data_collection import DataCollector
+    from data_visualization import DataVisualizer
+    from preprocessing import DataPreprocessor, convert_cgpa_to_letter_grade
+    from count_vectorization import FeatureVectorizer
+    from bilstm_model import BiLSTMModel
+    from gradient_boosting_model import GradientBoostingModel
+    from future_prediction import FuturePredictor
+    from model_evaluation import ModelEvaluator
+except ImportError:
+    # Try with full package path
+    from src.data_collection import DataCollector
+    from src.data_visualization import DataVisualizer
+    from src.preprocessing import DataPreprocessor, convert_cgpa_to_letter_grade
+    from src.count_vectorization import FeatureVectorizer
+    from src.bilstm_model import BiLSTMModel
+    from src.gradient_boosting_model import GradientBoostingModel
+    from src.future_prediction import FuturePredictor
+    from src.model_evaluation import ModelEvaluator
 
 class HabitorPipeline:
     def __init__(self, data_path, output_dir="output", classification_mode=False):
