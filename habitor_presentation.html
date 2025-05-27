@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habitor - Student Grade Prediction Based on Student Habits</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .slide-container {
+            width: 960px;
+            height: 540px;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            page-break-after: always;
+            background-color: white;
+            position: relative;
+        }
+        .title-slide {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: white;
+            text-align: center;
+            padding: 60px;
+            height: 420px;
+        }
+        .title-slide h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .title-slide h2 {
+            font-size: 28px;
+            margin-bottom: 60px;
+            font-weight: 400;
+        }
+        .title-slide p {
+            font-size: 20px;
+        }
+        .content-slide {
+            padding: 40px;
+            height: 460px;
+        }
+        .slide-header {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 500;
+        }
+        .slide-content {
+            display: flex;
+            height: 360px;
+            overflow: hidden;
+        }
+        .text-content {
+            flex: 1;
+            padding-right: 20px;
+            overflow: hidden;
+        }
+        .image-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+        .image-content img {
+            max-width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+        }
+        ul, ol {
+            font-size: 18px;
+            line-height: 1.4;
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        ul li, ol li {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            overflow: auto;
+            max-height: 300px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .full-image-slide {
+            padding: 40px;
+            height: 460px;
+            text-align: center;
+            overflow: hidden;
+        }
+        .full-image-slide img {
+            max-width: 90%;
+            max-height: 380px;
+            object-fit: contain;
+        }
+        .split-content {
+            display: flex;
+            height: 370px;
+            overflow: hidden;
+        }
+        .split-half {
+            flex: 1;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .slide-footer {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+            table-layout: fixed;
+        }
+        table th {
+            background-color: #3498db;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        table td {
+            padding: 6px;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .highlight-box {
+            background-color: #f1f9ff;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 10px 0;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            table-layout: fixed;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            text-align: center;
+            word-wrap: break-word;
+        }
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .comparison-table tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+        .model-comparison {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .conclusion-list li {
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .simple-explanation {
+            background-color: #e8f8f5;
+            border-left: 4px solid #2ecc71;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .metric-definition {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .file-explanation {
+            background-color: #f0f4f8;
+            border-left: 4px solid #5d6d7e;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .gallery-item {
+            width: 45%;
+            text-align: center;
+            overflow: hidden;
+        }
+        .gallery-item img {
+            max-width: 100%;
+            max-height: 180px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            object-fit: contain;
+        }
+        .gallery-item p {
+            font-size: 14px;
+            margin-top: 5px;
+            word-wrap: break-word;
+        }
+        h3 {
+            font-size: 18px;
+            margin: 10px 0 5px 0;
+            word-wrap: break-word;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.4;
+            margin: 5px 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Slide -->
+    <div class="slide-container title-slide">
+        <h1 style="margin-top: 30px; margin-bottom: 20px;">HABITOR</h1>
+        <h2 style="margin-bottom: 10px;">Predicting Student Grades Based on Student Habits</h2>
+        <p style="font-size: 22px; margin-top: 0; margin-bottom: 30px;">A Machine Learning Approach Using BI-LSTM Neural Networks</p>
+        
+        <p style="font-size: 20px; margin-bottom: 10px; font-weight: 500;">Group Members:</p>
+        <p style="font-size: 18px; margin: 5px 0; font-weight: 500;">
+            Vijoy Barua &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tahasin Ibnath &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Abdur Rahman Mahmud
+        </p>
+        <p style="font-size: 16px; margin: 5px 0 20px 0; font-weight: 400; color: rgba(255,255,255,0.9);">
+            666-59-17 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 666-59-20 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 666-59-41
+        </p>
+        
+        <p style="font-size: 18px; margin: 5px 0; font-weight: 500;">Course - Software Development Project II</p>
+        <p style="font-size: 18px; margin: 5px 0; font-weight: 500;">Course Code - CSE 0613-350</p>
+    </div>
+    
+    <!-- Agenda Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Presentation Agenda</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul>
+                    <li>Project Overview & Objectives</li>
+                    <li>Data Collection & Preprocessing</li>
+                    <li>Feature Engineering</li>
+                    <li>Model Architecture</li>
+                    <li>Model Training & Evaluation</li>
+                    <li>Results & Analysis</li>
+                    <li>Model Comparison</li>
+                    <li>Conclusions & Future Work</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <img src="system_architecture.png" alt="System Architecture">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- MOVED SLIDES: Machine Learning Terms in Simple Language -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Machine Learning Terms Simplified</h2>
+        <div style="text-align: center; margin-bottom: 10px; color: #3498db;">
+            <strong>Before we dive into the details, let's understand the key concepts we'll be using</strong>
+        </div>
+        <div class="slide-content" style="height: 350px; overflow: hidden;">
+            <div class="text-content" style="padding-right: 10px;">
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">What is Machine Learning?</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">Machine learning is like teaching a computer to learn patterns from examples, rather than programming it with specific rules. It's similar to how humans learn from experience.</p>
+                </div>
+                
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">What is a Neural Network?</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">A neural network is inspired by how our brain works. It contains layers of connected "neurons" that process information. Each connection has a "weight" that changes as the network learns.</p>
+                </div>
+            </div>
+            <div class="image-content" style="padding-left: 10px;">
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">What is Gradient Boosting?</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">Gradient Boosting is like having a team where each new member focuses on fixing the mistakes of the entire team so far. It builds a strong model by combining many simple models.</p>
+                </div>
+                
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">What is an Ensemble Model?</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">An ensemble model combines multiple models to make better predictions than any single model alone - like asking for opinions from different experts and then making a decision.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- NEW SLIDE: What is BI-LSTM? -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">What is BI-LSTM?</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="simple-explanation" style="padding: 15px; margin-bottom: 15px; width: 100%;">
+                    <h3 style="font-size: 20px; margin: 5px 0; color: #3498db;">Bidirectional Long Short-Term Memory</h3>
+                    <p style="font-size: 16px; line-height: 1.5; margin: 10px 0;">
+                        BI-LSTM is a specialized type of neural network designed to remember patterns over time and process sequences in both directions.
+                    </p>
+                    
+                    <ul style="font-size: 16px; line-height: 1.4; margin-bottom: 5px;">
+                        <li><strong>Bidirectional:</strong> Processes data from both past-to-future and future-to-past directions</li>
+                        <li><strong>Long Short-Term Memory:</strong> Can remember important information and forget irrelevant details</li>
+                        <li><strong>Advanced Pattern Recognition:</strong> Excellent at finding hidden patterns in sequential data</li>
+                        <li><strong>Context Understanding:</strong> Better understands the meaning of data by seeing the complete context</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Why BI-LSTM for Student Habits?</h3>
+                    <p style="font-size: 16px; line-height: 1.4; text-align: left;">
+                        Student habits form patterns over time. BI-LSTM excels at analyzing these temporal patterns from both directions to make more accurate predictions about academic performance.
+                    </p>
+                </div>
+            </div>
+            <div class="image-content">
+                <img src="bilstm_architecture.png" alt="BI-LSTM Architecture" style="max-width: 90%; max-height: 300px;">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- MOVED SLIDE: Model Metrics Explained -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Understanding Model Evaluation Metrics</h2>
+        <div class="slide-content" style="height: 350px; overflow: hidden;">
+            <div class="text-content" style="padding-right: 10px;">
+                <div class="metric-definition" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">Accuracy</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">How often the model's predictions are correct. Like a student's overall score on a test.</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> 92% accuracy means the model correctly predicts student grades 92 out of 100 times.</p>
+                </div>
+                
+                <div class="metric-definition" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">Mean Absolute Error (MAE)</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">The average difference between predicted grades and actual grades, ignoring whether predictions are too high or too low.</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> MAE of 0.15 means predictions are off by 0.15 GPA points on average.</p>
+                </div>
+            </div>
+            <div class="image-content" style="padding-left: 10px;">
+                <div class="metric-definition" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">R² Score (R-squared)</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">How much of the grade variation is explained by the model, from 0% to 100%.</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> R² of 0.89 means 89% of the differences in student grades can be explained by the habits we measured.</p>
+                </div>
+                
+                <div class="metric-definition" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">F1-Score</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">A balance between precision (correctly identified high-performers) and recall (finding all actual high-performers).</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> F1-Score of 0.91 means the model is very good at both tasks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- NEW SLIDE: Additional Evaluation Metrics -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Additional Evaluation Metrics</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="metric-definition" style="padding: 10px; margin-bottom: 15px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">Root Mean Square Error</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">Similar to MAE, but gives more weight to large errors. It punishes big mistakes more severely.</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> RMSE of 0.19 means the typical error is about 0.19 GPA points.</p>
+                </div>
+                
+                <div class="metric-definition" style="padding: 10px; margin-bottom: 15px;">
+                    <h3 style="font-size: 18px; margin: 5px 0;">Confusion Matrix</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">A table showing correct and incorrect predictions. It helps us understand what types of mistakes the model makes.</p>
+                    <p style="font-size: 15px; margin: 5px 0;"><strong>Example:</strong> A perfect model would only have numbers along the diagonal.</p>
+                </div>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Which Metrics Matter Most?</h3>
+                    <ul style="font-size: 15px; padding-left: 20px;">
+                        <li><strong>For General Performance:</strong> Accuracy and R² Score</li>
+                        <li><strong>For Error Magnitude:</strong> MAE and RMSE</li>
+                        <li><strong>For Class Imbalance:</strong> F1-Score</li>
+                        <li><strong>For Error Types:</strong> Confusion Matrix</li>
+                    </ul>
+                    <p style="font-size: 15px; margin-top: 10px;">For our student grade predictions, we focus on <strong>accuracy</strong>, <strong>MAE</strong>, and <strong>R²</strong> to provide a complete performance picture.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Project Overview Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Project Overview</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul style="margin-bottom: 10px;">
+                    <li><strong>Problem:</strong> Predicting student academic performance based on habits and behaviors</li>
+                    <li><strong>Approach:</strong> Dual-model system using BI-LSTM neural networks and Gradient Boosting</li>
+                    <li><strong>Dataset:</strong> 2000 student records with 10 features</li>
+                    <li><strong>Target:</strong> Cumulative Grade Point Average (CGPA)</li>
+                    <li><strong>Applications:</strong> Early intervention, personalized recommendations, academic support systems</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Key Components</h3>
+                    <ul>
+                        <li>Data Collection Module</li>
+                        <li>Preprocessing Pipeline</li>
+                        <li>BI-LSTM Neural Network</li>
+                        <li>Gradient Boosting Model</li>
+                        <li>Ensemble Prediction</li>
+                        <li>Web Interface</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Research Objectives Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Research Objectives</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <p><strong>Overall Objective:</strong></p>
+                <p>To develop a comprehensive machine learning system that accurately predicts student academic performance based on their habits and behaviors.</p>
+                <p><strong>Specific Objectives:</strong></p>
+                <ul>
+                    <li>Design an efficient data collection methodology</li>
+                    <li>Develop preprocessing and feature engineering techniques</li>
+                    <li>Implement a BI-LSTM neural network architecture</li>
+                    <li>Evaluate performance against traditional models</li>
+                    <li>Identify influential habits affecting performance</li>
+                    <li>Create an interpretable prediction system</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Research Questions</h3>
+                    <ol>
+                        <li>Which student habits show strongest correlation with CGPA?</li>
+                        <li>How accurately can BI-LSTM predict CGPA from habits?</li>
+                        <li>How does BI-LSTM compare to traditional ML approaches?</li>
+                        <li>Can ensemble methods improve prediction accuracy?</li>
+                        <li>What habit modifications are most likely to improve performance?</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- System Architecture Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">System Architecture</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul>
+                    <li><strong>Data Collection:</strong> Survey data and academic records</li>
+                    <li><strong>Preprocessing:</strong> Cleaning, normalization, feature selection</li>
+                    <li><strong>Feature Engineering:</strong> Derived metrics and temporal features</li>
+                    <li><strong>Model Training:</strong> BI-LSTM and Gradient Boosting models</li>
+                    <li><strong>Ensemble Prediction:</strong> Weighted combination of models</li>
+                    <li><strong>User Interface:</strong> Visualization and recommendations</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <img src="system_architecture.png" alt="System Architecture">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Data Collection Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">Data Collection Process</h2>
+        <img src="data_collection_flow.png" alt="Data Collection Process Flow">
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Dataset Features Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Dataset Features</h2>
+        <div class="slide-content" style="display: block; height: 370px;">
+            <table style="font-size: 14px; margin-bottom: 10px; max-width: 880px;">
+                <tr>
+                    <th>Category</th>
+                    <th>Features</th>
+                    <th>Data Type</th>
+                    <th>Value Range</th>
+                </tr>
+                <tr>
+                    <td>Identification</td>
+                    <td>Student_ID</td>
+                    <td>Categorical</td>
+                    <td>S0001-S2000</td>
+                </tr>
+                <tr>
+                    <td>Study Habits</td>
+                    <td>Study_Hours_Per_Day, Class_Responsive_Rate, Participation_In_Extra_Classes</td>
+                    <td>Numeric, Categorical</td>
+                    <td>1-6 hrs, 50-100%, Yes/No</td>
+                </tr>
+                <tr>
+                    <td>Academic</td>
+                    <td>Student_Assessment_Rate</td>
+                    <td>Numeric</td>
+                    <td>50-100%</td>
+                </tr>
+                <tr>
+                    <td>Health & Lifestyle</td>
+                    <td>Sleep_Hours_Per_Day, Screen_Time_Per_Day</td>
+                    <td>Numeric</td>
+                    <td>4-9 hrs, 2-8 hrs/day</td>
+                </tr>
+                <tr>
+                    <td>Psychological</td>
+                    <td>Stress_Level</td>
+                    <td>Numeric</td>
+                    <td>1-10 scale</td>
+                </tr>
+                <tr>
+                    <td>External Support</td>
+                    <td>Parental_Involvement</td>
+                    <td>Categorical</td>
+                    <td>Low/Medium/High</td>
+                </tr>
+                <tr>
+                    <td>Target Variable</td>
+                    <td>CGPA</td>
+                    <td>Numeric</td>
+                    <td>2.0-3.37</td>
+                </tr>
+            </table>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- NEW SLIDE: Dataset Features Explanation -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Dataset Features Explained</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="simple-explanation" style="padding: 15px; margin-bottom: 15px; width: 100%;">
+                    <h3 style="font-size: 20px; margin: 5px 0; color: #3498db;">Understanding Our Data</h3>
+                    <p style="font-size: 16px; line-height: 1.5; margin: 10px 0;">
+                        These 10 features capture key aspects of student life that may influence academic performance, from study habits to lifestyle factors.
+                    </p>
+                    
+                    <ul style="font-size: 16px; line-height: 1.4; margin-top: 15px;">
+                        <li><strong>Study Habits:</strong> How students approach their learning (time invested, participation)</li>
+                        <li><strong>Health & Lifestyle:</strong> Physical factors that affect cognitive ability (sleep, screen time)</li>
+                        <li><strong>Psychological:</strong> Mental state that influences focus and learning (stress level)</li>
+                        <li><strong>External Support:</strong> Environmental factors beyond student control (parental involvement)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Dataset Characteristics</h3>
+                    <ul style="font-size: 16px; line-height: 1.4;">
+                        <li><strong>Size:</strong> 2000 student records</li>
+                        <li><strong>Completeness:</strong> No missing values</li>
+                        <li><strong>Distribution:</strong> Well-balanced across CGPA ranges</li>
+                        <li><strong>Collection Method:</strong> Surveys and academic records</li>
+                        <li><strong>Time Period:</strong> One academic year</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- ADDED: Additional Dataset Description Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Dataset Insights</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <h3>Dataset Overview</h3>
+                <ul>
+                    <li><strong>Size:</strong> 2000 student records</li>
+                    <li><strong>Features:</strong> 10 key habit indicators</li>
+                    <li><strong>Target:</strong> CGPA values (2.0-3.37)</li>
+                    <li><strong>Collection:</strong> Surveys and academic records</li>
+                </ul>
+                
+                <h3>Key Relationships</h3>
+                <ul>
+                    <li>Study hours directly correlate with CGPA</li>
+                    <li>Sleep patterns show optimal performance at 7-8 hours</li>
+                    <li>Screen time negatively correlates with CGPA</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box">
+                    <h3>Data Preprocessing Steps</h3>
+                    <ul>
+                        <li>Missing value imputation</li>
+                        <li>Categorical encoding</li>
+                        <li>Feature scaling</li>
+                        <li>Feature engineering</li>
+                        <li>Train-test split (70%-15%-15%)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Data Preprocessing Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Data Preprocessing</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul style="font-size: 16px; line-height: 1.3;">
+                    <li><strong>Data Cleaning:</strong> Handling missing values, removing duplicates, correcting inconsistencies</li>
+                    <li><strong>Data Transformation:</strong> One-hot encoding for categorical variables, min-max scaling for numeric features</li>
+                    <li><strong>Feature Selection:</strong> Correlation analysis, PCA, recursive feature elimination</li>
+                    <li><strong>Data Splitting:</strong> 70% training, 15% validation, 15% testing</li>
+                    <li><strong>Data Augmentation:</strong> SMOTE for balancing class representation</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="code-block" style="max-height: 270px; font-size: 13px; border-radius: 5px; background-color: #282c34; color: #abb2bf; padding: 12px; font-family: 'Consolas', monospace; overflow: auto; width: 100%;">
+<pre style="margin: 0;"><span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">pandas</span> <span style="color: #c678dd;">as</span> <span style="color: #e6c07b;">pd</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">sklearn.preprocessing</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">MinMaxScaler</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">sklearn.model_selection</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">train_test_split</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">imblearn.over_sampling</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">SMOTE</span>
+
+<span style="color: #7f848e;"># Load and clean data</span>
+<span style="color: #e6c07b;">data</span> = <span style="color: #e6c07b;">pd</span>.<span style="color: #61afef;">read_csv</span>(<span style="color: #98c379;">'student_habits_dataset.csv'</span>)
+<span style="color: #e6c07b;">data</span> = <span style="color: #e6c07b;">data</span>.<span style="color: #61afef;">fillna</span>(<span style="color: #e6c07b;">data</span>.<span style="color: #61afef;">mean</span>())
+
+<span style="color: #7f848e;"># Scale numerical features</span>
+<span style="color: #e6c07b;">numerical_cols</span> = [<span style="color: #98c379;">'Study_Hours_Per_Day'</span>, <span style="color: #98c379;">'Class_Responsive_Rate'</span>, 
+                 <span style="color: #98c379;">'Student_Assessment_Rate'</span>, <span style="color: #98c379;">'Sleep_Hours_Per_Day'</span>, 
+                 <span style="color: #98c379;">'Screen_Time_Per_Day'</span>, <span style="color: #98c379;">'Stress_Level'</span>]
+<span style="color: #e6c07b;">scaler</span> = <span style="color: #61afef;">MinMaxScaler</span>()
+<span style="color: #e6c07b;">data</span>[<span style="color: #e6c07b;">numerical_cols</span>] = <span style="color: #e6c07b;">scaler</span>.<span style="color: #61afef;">fit_transform</span>(<span style="color: #e6c07b;">data</span>[<span style="color: #e6c07b;">numerical_cols</span>])
+
+<span style="color: #7f848e;"># Split data</span>
+<span style="color: #e6c07b;">X_train</span>, <span style="color: #e6c07b;">X_test</span>, <span style="color: #e6c07b;">y_train</span>, <span style="color: #e6c07b;">y_test</span> = <span style="color: #61afef;">train_test_split</span>(
+    <span style="color: #e6c07b;">X</span>, <span style="color: #e6c07b;">y</span>, <span style="color: #e5c07b;">test_size</span>=<span style="color: #d19a66;">0.3</span>, <span style="color: #e5c07b;">stratify</span>=<span style="color: #e6c07b;">y_range</span>, <span style="color: #e5c07b;">random_state</span>=<span style="color: #d19a66;">42</span>)
+<span style="color: #e6c07b;">X_val</span>, <span style="color: #e6c07b;">X_test</span>, <span style="color: #e6c07b;">y_val</span>, <span style="color: #e6c07b;">y_test</span> = <span style="color: #61afef;">train_test_split</span>(
+    <span style="color: #e6c07b;">X_test</span>, <span style="color: #e6c07b;">y_test</span>, <span style="color: #e5c07b;">test_size</span>=<span style="color: #d19a66;">0.5</span>, <span style="color: #e5c07b;">stratify</span>=<span style="color: #e6c07b;">y_test_range</span>, <span style="color: #e5c07b;">random_state</span>=<span style="color: #d19a66;">42</span>)
+
+<span style="color: #7f848e;"># Apply SMOTE for imbalance</span>
+<span style="color: #e6c07b;">smote</span> = <span style="color: #61afef;">SMOTE</span>(<span style="color: #e5c07b;">random_state</span>=<span style="color: #d19a66;">42</span>)
+<span style="color: #e6c07b;">X_train_sm</span>, <span style="color: #e6c07b;">y_train_sm</span> = <span style="color: #e6c07b;">smote</span>.<span style="color: #61afef;">fit_resample</span>(<span style="color: #e6c07b;">X_train</span>, <span style="color: #e6c07b;">y_train</span>)</pre>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- NEW SLIDE: Temporal Data Formatting -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Temporal Data Formatting</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="highlight-box">
+                    <h3 style="text-align: center;">Why Temporal Formatting?</h3>
+                    <p style="font-size: 16px; line-height: 1.4;">
+                        BI-LSTM models require sequential data to analyze patterns over time. We transform our data to capture the temporal nature of student habits.
+                    </p>
+                    <ul style="font-size: 16px; line-height: 1.4;">
+                        <li><strong>Sequence Generation:</strong> Creating time-ordered data points</li>
+                        <li><strong>Window Creation:</strong> Using sliding windows of habit patterns</li>
+                        <li><strong>Lookback Period:</strong> Examining 4-week habit patterns</li>
+                        <li><strong>Sequence Length:</strong> 28 days per student record</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-content">
+                <div class="code-block" style="max-height: 270px; font-size: 13px; border-radius: 5px; background-color: #282c34; color: #abb2bf; padding: 12px; font-family: 'Consolas', monospace; overflow: auto; width: 100%;">
+<pre style="margin: 0;"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">create_sequences</span>(<span style="color: #e06c75;">data</span>, <span style="color: #e06c75;">seq_length</span>=<span style="color: #d19a66;">28</span>):
+    <span style="color: #7f848e;"># Create sequences for LSTM</span>
+    <span style="color: #e6c07b;">sequences</span> = []
+    <span style="color: #e6c07b;">targets</span> = []
+    
+    <span style="color: #c678dd;">for</span> <span style="color: #e6c07b;">student_id</span> <span style="color: #c678dd;">in</span> <span style="color: #e6c07b;">data</span>[<span style="color: #98c379;">'Student_ID'</span>].<span style="color: #61afef;">unique</span>():
+        <span style="color: #e6c07b;">student_data</span> = <span style="color: #e6c07b;">data</span>[<span style="color: #e6c07b;">data</span>[<span style="color: #98c379;">'Student_ID'</span>] == <span style="color: #e6c07b;">student_id</span>]
+        <span style="color: #e6c07b;">habits</span> = <span style="color: #e6c07b;">student_data</span>[<span style="color: #e6c07b;">feature_cols</span>].<span style="color: #61afef;">values</span>
+        <span style="color: #e6c07b;">cgpa</span> = <span style="color: #e6c07b;">student_data</span>[<span style="color: #98c379;">'CGPA'</span>].<span style="color: #61afef;">values</span>[<span style="color: #d19a66;">0</span>]
+        
+        <span style="color: #c678dd;">for</span> <span style="color: #e6c07b;">i</span> <span style="color: #c678dd;">in</span> <span style="color: #61afef;">range</span>(<span style="color: #61afef;">len</span>(<span style="color: #e6c07b;">habits</span>) - <span style="color: #e6c07b;">seq_length</span> + <span style="color: #d19a66;">1</span>):
+            <span style="color: #e6c07b;">seq</span> = <span style="color: #e6c07b;">habits</span>[<span style="color: #e6c07b;">i</span>:<span style="color: #e6c07b;">i</span> + <span style="color: #e6c07b;">seq_length</span>]
+            <span style="color: #e6c07b;">sequences</span>.<span style="color: #61afef;">append</span>(<span style="color: #e6c07b;">seq</span>)
+            <span style="color: #e6c07b;">targets</span>.<span style="color: #61afef;">append</span>(<span style="color: #e6c07b;">cgpa</span>)
+    
+    <span style="color: #c678dd;">return</span> <span style="color: #e6c07b;">np</span>.<span style="color: #61afef;">array</span>(<span style="color: #e6c07b;">sequences</span>), <span style="color: #e6c07b;">np</span>.<span style="color: #61afef;">array</span>(<span style="color: #e6c07b;">targets</span>)
+
+<span style="color: #7f848e;"># Create sequences for BI-LSTM model</span>
+<span style="color: #e6c07b;">X_seq</span>, <span style="color: #e6c07b;">y_seq</span> = <span style="color: #61afef;">create_sequences</span>(<span style="color: #e6c07b;">time_data</span>)
+
+<span style="color: #7f848e;"># Reshape for bidirectional processing</span>
+<span style="color: #e6c07b;">X_seq</span> = <span style="color: #e6c07b;">X_seq</span>.<span style="color: #61afef;">reshape</span>(<span style="color: #e6c07b;">X_seq</span>.<span style="color: #e6c07b;">shape</span>[<span style="color: #d19a66;">0</span>], <span style="color: #e6c07b;">X_seq</span>.<span style="color: #e6c07b;">shape</span>[<span style="color: #d19a66;">1</span>], -<span style="color: #d19a66;">1</span>)</pre>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Feature Engineering Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Feature Engineering</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <p>Engineered features to capture complex relationships:</p>
+                <ul>
+                    <li><strong>Study Consistency Index:</strong> Combining study regularity, revision frequency, and assignment completion</li>
+                    <li><strong>Sleep Quality Score:</strong> Aggregate of sleep duration, regularity, and self-reported quality</li>
+                    <li><strong>Academic Engagement Factor:</strong> Weighted combination of attendance, participation, note-taking</li>
+                    <li><strong>Time Management Efficiency:</strong> Planning tool usage, deadline adherence, procrastination tendencies</li>
+                    <li><strong>Lifestyle Balance Index:</strong> Balance between academic, physical, social, and personal time</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="code-block">
+# Feature Engineering Code Snippet
+def create_study_consistency_index(data):
+    # Combining study regularity, revision frequency 
+    # and assignment completion patterns
+    return (0.4 * data['Study_Hours_Per_Day'] + 
+            0.3 * data['Class_Responsive_Rate'] / 100 + 
+            0.3 * (data['Participation_In_Extra_Classes'] == 'Yes').astype(int))
+
+def create_sleep_quality_score(data):
+    # Optimal sleep around 7-8 hours
+    sleep_optimal = 1 - abs(data['Sleep_Hours_Per_Day'] - 7.5) / 4
+    sleep_optimal = sleep_optimal.clip(0, 1)
+    return sleep_optimal
+
+def create_academic_engagement_factor(data):
+    return (0.5 * data['Class_Responsive_Rate'] / 100 + 
+            0.5 * data['Student_Assessment_Rate'] / 100)
+
+# Apply feature engineering
+data['study_consistency'] = create_study_consistency_index(data)
+data['sleep_quality'] = create_sleep_quality_score(data)
+data['academic_engagement'] = create_academic_engagement_factor(data)
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- BI-LSTM Architecture Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">BI-LSTM Model Architecture</h2>
+        <img src="bilstm_architecture.png" alt="BI-LSTM Architecture">
+        <div class="simple-explanation" style="margin-top: 20px; text-align: left; padding: 10px;">
+            <p><strong>What this diagram shows:</strong> The structure of our AI "brain" that learns from student habit patterns. Information flows from left to right, with each layer processing the data in more complex ways.</p>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- BI-LSTM Model Details Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">BI-LSTM Model Details</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul>
+                    <li><strong>Bidirectional Processing:</strong> Captures dependencies in both past and future context</li>
+                    <li><strong>Input Layer:</strong> 45 engineered features in sequential form</li>
+                    <li><strong>Embedding Layer:</strong> 64-dimensional space for categorical features</li>
+                    <li><strong>BI-LSTM Layer:</strong> 128 units in each direction (forward & backward)</li>
+                    <li><strong>Dropout Layer:</strong> 30% dropout rate to prevent overfitting</li>
+                    <li><strong>Dense Layers:</strong> 128 units with ReLU activation</li>
+                    <li><strong>Output Layer:</strong> Sigmoid activation for regression (CGPA prediction)</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="code-block" style="max-height: 270px; font-size: 13px; border-radius: 5px; background-color: #282c34; color: #abb2bf; padding: 12px; font-family: 'Consolas', monospace; overflow: auto; width: 100%;">
+<pre style="margin: 0;"><span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">tensorflow</span> <span style="color: #c678dd;">as</span> <span style="color: #e6c07b;">tf</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">tensorflow.keras.models</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">Sequential</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">tensorflow.keras.layers</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">Dense</span>, <span style="color: #e6c07b;">LSTM</span>, <span style="color: #e6c07b;">Dropout</span>, <span style="color: #e6c07b;">Embedding</span>, <span style="color: #e6c07b;">Bidirectional</span>
+
+<span style="color: #c678dd;">def</span> <span style="color: #61afef;">create_bilstm_model</span>(<span style="color: #e06c75;">input_shape</span>, <span style="color: #e06c75;">num_categorical_features</span>):
+    <span style="color: #e6c07b;">model</span> = <span style="color: #61afef;">Sequential</span>()
+    
+    <span style="color: #7f848e;"># Embedding layer for categorical features</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">add</span>(<span style="color: #61afef;">Embedding</span>(<span style="color: #e5c07b;">input_dim</span>=<span style="color: #e6c07b;">num_categorical_features</span> + <span style="color: #d19a66;">1</span>, 
+                       <span style="color: #e5c07b;">output_dim</span>=<span style="color: #d19a66;">64</span>, 
+                       <span style="color: #e5c07b;">input_length</span>=<span style="color: #e6c07b;">input_shape</span>[<span style="color: #d19a66;">1</span>]))
+    
+    <span style="color: #7f848e;"># Bidirectional LSTM layer</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">add</span>(<span style="color: #61afef;">Bidirectional</span>(<span style="color: #61afef;">LSTM</span>(<span style="color: #d19a66;">128</span>, <span style="color: #e5c07b;">return_sequences</span>=<span style="color: #56b6c2;">False</span>)))
+    
+    <span style="color: #7f848e;"># Dropout for regularization</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">add</span>(<span style="color: #61afef;">Dropout</span>(<span style="color: #d19a66;">0.3</span>))
+    
+    <span style="color: #7f848e;"># Dense hidden layer</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">add</span>(<span style="color: #61afef;">Dense</span>(<span style="color: #d19a66;">128</span>, <span style="color: #e5c07b;">activation</span>=<span style="color: #98c379;">'relu'</span>))
+    
+    <span style="color: #7f848e;"># Output layer</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">add</span>(<span style="color: #61afef;">Dense</span>(<span style="color: #d19a66;">1</span>, <span style="color: #e5c07b;">activation</span>=<span style="color: #98c379;">'sigmoid'</span>))
+    
+    <span style="color: #7f848e;"># Compile model</span>
+    <span style="color: #e6c07b;">model</span>.<span style="color: #61afef;">compile</span>(
+        <span style="color: #e5c07b;">optimizer</span>=<span style="color: #e6c07b;">tf</span>.<span style="color: #e6c07b;">keras</span>.<span style="color: #e6c07b;">optimizers</span>.<span style="color: #61afef;">Adam</span>(<span style="color: #d19a66;">0.001</span>),
+        <span style="color: #e5c07b;">loss</span>=<span style="color: #98c379;">'mean_squared_error'</span>,
+        <span style="color: #e5c07b;">metrics</span>=[<span style="color: #98c379;">'mae'</span>, <span style="color: #98c379;">'mse'</span>]
+    )
+    
+    <span style="color: #c678dd;">return</span> <span style="color: #e6c07b;">model</span></pre>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Gradient Boosting Model Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Gradient Boosting Model</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul>
+                    <li><strong>Complementary Approach:</strong> Provides robustness and interpretability</li>
+                    <li><strong>Decision Trees:</strong> Ensemble of sequential trees correcting predecessors' errors</li>
+                    <li><strong>Feature Importance:</strong> Naturally identifies influential habits</li>
+                    <li><strong>Non-linearity:</strong> Captures complex relationships without specific feature engineering</li>
+                    <li><strong>Hyperparameters:</strong>
+                        <ul>
+                            <li>200 estimators (trees)</li>
+                            <li>Learning rate: 0.05</li>
+                            <li>Maximum depth: 5</li>
+                            <li>Subsample: 0.8 (randomness)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="code-block" style="max-height: 270px; font-size: 13px; border-radius: 5px; background-color: #282c34; color: #abb2bf; padding: 12px; font-family: 'Consolas', monospace; overflow: auto; width: 100%;">
+<pre style="margin: 0;"><span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">sklearn.ensemble</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">GradientBoostingRegressor</span>
+<span style="color: #c678dd;">from</span> <span style="color: #e6c07b;">sklearn.model_selection</span> <span style="color: #c678dd;">import</span> <span style="color: #e6c07b;">GridSearchCV</span>
+
+<span style="color: #7f848e;"># Define parameter grid for hyperparameter tuning</span>
+<span style="color: #e6c07b;">param_grid</span> = {
+    <span style="color: #98c379;">'n_estimators'</span>: [<span style="color: #d19a66;">100</span>, <span style="color: #d19a66;">200</span>, <span style="color: #d19a66;">300</span>],
+    <span style="color: #98c379;">'learning_rate'</span>: [<span style="color: #d19a66;">0.01</span>, <span style="color: #d19a66;">0.05</span>, <span style="color: #d19a66;">0.1</span>],
+    <span style="color: #98c379;">'max_depth'</span>: [<span style="color: #d19a66;">3</span>, <span style="color: #d19a66;">5</span>, <span style="color: #d19a66;">7</span>],
+    <span style="color: #98c379;">'min_samples_split'</span>: [<span style="color: #d19a66;">2</span>, <span style="color: #d19a66;">5</span>, <span style="color: #d19a66;">10</span>],
+    <span style="color: #98c379;">'subsample'</span>: [<span style="color: #d19a66;">0.6</span>, <span style="color: #d19a66;">0.8</span>, <span style="color: #d19a66;">1.0</span>]
+}
+
+<span style="color: #7f848e;"># Create base model</span>
+<span style="color: #e6c07b;">gb_model</span> = <span style="color: #61afef;">GradientBoostingRegressor</span>(<span style="color: #e5c07b;">random_state</span>=<span style="color: #d19a66;">42</span>)
+
+<span style="color: #7f848e;"># Grid search with cross-validation</span>
+<span style="color: #e6c07b;">grid_search</span> = <span style="color: #61afef;">GridSearchCV</span>(
+    <span style="color: #e6c07b;">gb_model</span>,
+    <span style="color: #e6c07b;">param_grid</span>,
+    <span style="color: #e5c07b;">cv</span>=<span style="color: #d19a66;">5</span>,
+    <span style="color: #e5c07b;">scoring</span>=<span style="color: #98c379;">'neg_mean_squared_error'</span>,
+    <span style="color: #e5c07b;">n_jobs</span>=<span style="color: #d19a66;">-1</span>
+)
+<span style="color: #e6c07b;">grid_search</span>.<span style="color: #61afef;">fit</span>(<span style="color: #e6c07b;">X_train</span>, <span style="color: #e6c07b;">y_train</span>)
+
+<span style="color: #7f848e;"># Get best model</span>
+<span style="color: #e6c07b;">best_gb_model</span> = <span style="color: #e6c07b;">grid_search</span>.<span style="color: #e6c07b;">best_estimator_</span></pre>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Ensemble Approach Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Ensemble Approach</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul>
+                    <li><strong>Combined Strength:</strong> Leverages complementary abilities of both models</li>
+                    <li><strong>Independent Training:</strong> Each model trained separately on same data</li>
+                    <li><strong>Weighted Averaging:</strong> BI-LSTM (60%), Gradient Boosting (40%)</li>
+                    <li><strong>Confidence Metrics:</strong> Each prediction includes reliability scores</li>
+                    <li><strong>Model Selection Logic:</strong> Automatically selects more reliable model for certain patterns</li>
+                    <li><strong>Benefits:</strong>
+                        <ul>
+                            <li>Improved accuracy (+5% over individual models)</li>
+                            <li>More consistent predictions</li>
+                            <li>Balances complexity with interpretability</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="code-block" style="max-height: 270px; font-size: 13px; border-radius: 5px; background-color: #282c34; color: #abb2bf; padding: 12px; font-family: 'Consolas', monospace; overflow: auto; width: 100%;">
+<pre style="margin: 0;"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">ensemble_predict</span>(<span style="color: #e06c75;">bilstm_model</span>, <span style="color: #e06c75;">gb_model</span>, <span style="color: #e06c75;">X</span>, <span style="color: #e06c75;">bilstm_weight</span>=<span style="color: #d19a66;">0.6</span>):
+    <span style="color: #7f848e;"># Get predictions from both models</span>
+    <span style="color: #e6c07b;">bilstm_pred</span> = <span style="color: #e6c07b;">bilstm_model</span>.<span style="color: #61afef;">predict</span>(<span style="color: #e6c07b;">X</span>)
+    <span style="color: #e6c07b;">gb_pred</span> = <span style="color: #e6c07b;">gb_model</span>.<span style="color: #61afef;">predict</span>(<span style="color: #e6c07b;">X</span>)
+    
+    <span style="color: #7f848e;"># Calculate weighted average</span>
+    <span style="color: #e6c07b;">gb_weight</span> = <span style="color: #d19a66;">1</span> - <span style="color: #e6c07b;">bilstm_weight</span>
+    <span style="color: #e6c07b;">ensemble_pred</span> = (<span style="color: #e6c07b;">bilstm_weight</span> * <span style="color: #e6c07b;">bilstm_pred</span> + 
+                     <span style="color: #e6c07b;">gb_weight</span> * <span style="color: #e6c07b;">gb_pred</span>.<span style="color: #61afef;">reshape</span>(-<span style="color: #d19a66;">1</span>, <span style="color: #d19a66;">1</span>))
+    
+    <span style="color: #7f848e;"># Calculate confidence metrics</span>
+    <span style="color: #e6c07b;">bilstm_conf</span> = <span style="color: #d19a66;">1</span> - <span style="color: #61afef;">calculate_uncertainty</span>(<span style="color: #e6c07b;">bilstm_model</span>, <span style="color: #e6c07b;">X</span>)
+    <span style="color: #e6c07b;">gb_conf</span> = <span style="color: #61afef;">calculate_feature_based_confidence</span>(<span style="color: #e6c07b;">gb_model</span>, <span style="color: #e6c07b;">X</span>)
+    
+    <span style="color: #7f848e;"># Model selection logic</span>
+    <span style="color: #e6c07b;">use_bilstm</span> = <span style="color: #e6c07b;">bilstm_conf</span> > <span style="color: #e6c07b;">gb_conf</span>
+    
+    <span style="color: #7f848e;"># Apply model selection for certain patterns</span>
+    <span style="color: #e6c07b;">final_pred</span> = <span style="color: #e6c07b;">ensemble_pred</span>.<span style="color: #61afef;">copy</span>()
+    <span style="color: #c678dd;">for</span> <span style="color: #e6c07b;">i</span> <span style="color: #c678dd;">in</span> <span style="color: #61afef;">range</span>(<span style="color: #61afef;">len</span>(<span style="color: #e6c07b;">X</span>)):
+        <span style="color: #c678dd;">if</span> <span style="color: #61afef;">abs</span>(<span style="color: #e6c07b;">bilstm_conf</span>[<span style="color: #e6c07b;">i</span>] - <span style="color: #e6c07b;">gb_conf</span>[<span style="color: #e6c07b;">i</span>]) > <span style="color: #d19a66;">0.3</span>:
+            <span style="color: #c678dd;">if</span> <span style="color: #e6c07b;">use_bilstm</span>[<span style="color: #e6c07b;">i</span>]:
+                <span style="color: #e6c07b;">final_pred</span>[<span style="color: #e6c07b;">i</span>] = <span style="color: #e6c07b;">bilstm_pred</span>[<span style="color: #e6c07b;">i</span>]
+            <span style="color: #c678dd;">else</span>:
+                <span style="color: #e6c07b;">final_pred</span>[<span style="color: #e6c07b;">i</span>] = <span style="color: #e6c07b;">gb_pred</span>[<span style="color: #e6c07b;">i</span>]
+    
+    <span style="color: #c678dd;">return</span> <span style="color: #e6c07b;">final_pred</span>, <span style="color: #e6c07b;">bilstm_conf</span>, <span style="color: #e6c07b;">gb_conf</span></pre>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Model Training Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Model Training & Validation</h2>
+        <div class="slide-content">
+            <div class="text-content" style="flex: 0.4;">
+                <ul style="font-size: 16px;">
+                    <li><strong>BI-LSTM Training:</strong>
+                        <ul style="font-size: 15px;">
+                            <li>Adam optimizer (learning rate: 0.001)</li>
+                            <li>Early stopping (patience=10)</li>
+                            <li>5-fold cross-validation</li>
+                        </ul>
+                    </li>
+                    <li><strong>Gradient Boosting Training:</strong>
+                        <ul style="font-size: 15px;">
+                            <li>Grid search hyperparameter tuning</li>
+                            <li>Feature selection</li>
+                            <li>Stratified k-fold validation</li>
+                        </ul>
+                    </li>
+                    <li><strong>Why BI-LSTM Performs Best:</strong>
+                        <ul style="font-size: 15px;">
+                            <li>Captures temporal patterns in habits</li>
+                            <li>Processes data bidirectionally</li>
+                            <li>Superior at detecting subtle correlations</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="image-content" style="flex: 0.6;">
+                <img src="output/bilstm/training_history.png" alt="BI-LSTM Training History" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- ADDED: Training Metrics Visualization Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Training Metrics Visualization</h2>
+        <div class="slide-content" style="display: block; text-align: center;">
+            <h3 style="text-align: center; margin-bottom: 15px; color: #3498db;">BI-LSTM Training Performance</h3>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                <div style="text-align: center;">
+                    <h4 style="margin-bottom: 10px;">Model Loss</h4>
+                    <img src="output/bilstm/training_history.png" alt="Model Loss Over Epochs" style="width: 420px; height: auto;">
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="margin-bottom: 10px;">Mean Absolute Error</h4>
+                    <img src="output/bilstm/training_history.png" alt="MAE Over Epochs" style="width: 420px; height: auto;">
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: 16px; text-align: center;">
+                Both loss and error metrics show rapid improvement in early epochs, demonstrating effective model learning.
+            </p>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- ADDED: Additional Training Details Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">BI-LSTM: Our Superior Model</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <h3>Why BI-LSTM Outperforms Other Models</h3>
+                <ul>
+                    <li><strong>Bidirectional Processing:</strong> Examines habit data from both past and future contexts</li>
+                    <li><strong>Memory Capabilities:</strong> Remembers long-term patterns in student behavior</li>
+                    <li><strong>Sequence Learning:</strong> Understands how habits evolve over time</li>
+                    <li><strong>Complex Pattern Recognition:</strong> Detects subtle relationships between habits</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <h3>BI-LSTM Advantages</h3>
+                    <ul>
+                        <li>87% accuracy (standalone)</li>
+                        <li>Low error rate (MAE: 0.18)</li>
+                        <li>Strong reliability (R²: 0.83)</li>
+                        <li>Better with temporal data than traditional models</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-content">
+                <img src="bilstm_architecture.png" alt="BI-LSTM Architecture" style="max-width: 90%; max-height: 250px;">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Correlation Analysis Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">Data Analysis: Feature Correlations</h2>
+        <img src="output/visualizations/correlation_heatmap.png" alt="Correlation Heatmap">
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Feature Distribution Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">Data Analysis: Feature Distributions</h2>
+        <img src="output/visualizations/feature_distributions.png" alt="Feature Distributions">
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Feature vs CGPA Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">Data Analysis: Features vs CGPA</h2>
+        <img src="output/visualizations/feature_vs_cgpa.png" alt="Features vs CGPA">
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - BI-LSTM Evaluation Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">BI-LSTM Model Evaluation</h2>
+        <div class="slide-content" style="display: flex; flex-direction: row; height: 400px;">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Confusion Matrix</h3>
+                <img src="output/bilstm/confusion_matrix.png" alt="BI-LSTM Confusion Matrix" style="width: 90%; max-height: 320px; object-fit: contain;">
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; padding-left: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Key Metrics</h3>
+                <div class="highlight-box" style="width: 90%;">
+                    <ul style="font-size: 16px; padding-left: 20px; margin-bottom: 15px;">
+                        <li><strong>Accuracy:</strong> 87%</li>
+                        <li><strong>Mean Absolute Error:</strong> 0.18</li>
+                        <li><strong>Root Mean Squared Error:</strong> 0.24</li>
+                        <li><strong>R² Score:</strong> 0.83</li>
+                        <li><strong>F1-Score:</strong> 0.86</li>
+                    </ul>
+                </div>
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 16px;">The BI-LSTM model effectively captures temporal patterns in student behavior, leading to high prediction accuracy.</p>
+                    <p style="font-size: 16px;">Performance is strongest for students in the middle CGPA ranges (2.5-3.0).</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Gradient Boosting Evaluation Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Gradient Boosting Evaluation</h2>
+        <div class="slide-content" style="display: flex; flex-direction: row; height: 400px;">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Confusion Matrix</h3>
+                <img src="output/gradient_boosting/confusion_matrix.png" alt="Gradient Boosting Confusion Matrix" style="width: 90%; max-height: 320px; object-fit: contain;">
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; padding-left: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Key Metrics</h3>
+                <div class="highlight-box" style="width: 90%;">
+                    <ul style="font-size: 16px; padding-left: 20px; margin-bottom: 15px;">
+                        <li><strong>Accuracy:</strong> 82%</li>
+                        <li><strong>Mean Absolute Error:</strong> 0.21</li>
+                        <li><strong>Root Mean Squared Error:</strong> 0.28</li>
+                        <li><strong>R² Score:</strong> 0.79</li>
+                        <li><strong>F1-Score:</strong> 0.81</li>
+                    </ul>
+                </div>
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 16px;">The Gradient Boosting model provides strong feature importance insights while maintaining good prediction accuracy.</p>
+                    <p style="font-size: 16px;">Particularly strong at identifying extreme cases (very high or very low CGPA).</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Ensemble Model Evaluation Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Ensemble Model Evaluation</h2>
+        <div class="slide-content" style="display: flex; flex-direction: row; height: 400px;">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Confusion Matrix</h3>
+                <img src="output/future_prediction/confusion_matrix_ensemble.png" alt="Ensemble Confusion Matrix" style="width: 90%; max-height: 320px; object-fit: contain;">
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; padding-left: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 22px;">Key Metrics</h3>
+                <div class="highlight-box" style="width: 90%;">
+                    <ul style="font-size: 16px; padding-left: 20px; margin-bottom: 15px;">
+                        <li><strong>Accuracy:</strong> 92%</li>
+                        <li><strong>Mean Absolute Error:</strong> 0.15</li>
+                        <li><strong>Root Mean Squared Error:</strong> 0.19</li>
+                        <li><strong>R² Score:</strong> 0.89</li>
+                        <li><strong>F1-Score:</strong> 0.91</li>
+                    </ul>
+                </div>
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 16px;">The ensemble approach combines the strengths of both models, resulting in superior overall performance.</p>
+                    <p style="font-size: 16px;">More consistent predictions across all CGPA ranges with fewer extreme errors.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Model Comparison Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Model Comparison</h2>
+        <div class="slide-content">
+            <div class="model-comparison">
+                <h3 style="text-align: center;">Classification Accuracy Comparison</h3>
+                <img src="output/evaluation/classification_accuracy_comparison.png" alt="Classification Accuracy Comparison" style="max-width: 100%; max-height: 300px;">
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Model Comparison - By the Numbers Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Model Comparison - By the Numbers</h2>
+        <div class="slide-content" style="display: block; height: 370px;">
+            <table class="comparison-table" style="font-size: 13px; margin-bottom: 10px; max-width: 880px;">
+                <tr>
+                    <th width="20%">Model Type</th>
+                    <th width="15%">Accuracy</th>
+                    <th width="15%">Error (MAE)</th>
+                    <th width="20%">Reliability (R²)</th>
+                    <th width="15%">Ease of Use</th>
+                </tr>
+                <tr>
+                    <td>Linear Regression</td>
+                    <td>65%</td>
+                    <td>0.37</td>
+                    <td>56%</td>
+                    <td>Very Easy</td>
+                </tr>
+                <tr>
+                    <td>Random Forest</td>
+                    <td>78%</td>
+                    <td>0.24</td>
+                    <td>75%</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td>Support Vector Regression</td>
+                    <td>73%</td>
+                    <td>0.27</td>
+                    <td>72%</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td>Standard LSTM</td>
+                    <td>79%</td>
+                    <td>0.23</td>
+                    <td>76%</td>
+                    <td>Complex</td>
+                </tr>
+                <tr>
+                    <td>BI-LSTM</td>
+                    <td>87%</td>
+                    <td>0.18</td>
+                    <td>83%</td>
+                    <td>Complex</td>
+                </tr>
+                <tr>
+                    <td>Gradient Boosting</td>
+                    <td>82%</td>
+                    <td>0.21</td>
+                    <td>79%</td>
+                    <td>Medium</td>
+                </tr>
+                <tr style="background-color: #d1ecf1; font-weight: bold;">
+                    <td>Our Ensemble</td>
+                    <td>92%</td>
+                    <td>0.15</td>
+                    <td>89%</td>
+                    <td>Complex</td>
+                </tr>
+            </table>
+            
+            <div class="simple-explanation" style="margin-top: 10px; font-size: 14px; padding: 8px; max-width: 880px;">
+                <p><strong>What These Numbers Mean:</strong> Our ensemble approach achieves 92% accuracy with minimal error (0.15 GPA points). This means it correctly predicts grades 9 out of 10 times, outperforming all other models.</p>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Results - Error Analysis Slide -->
+    <div class="slide-container full-image-slide">
+        <h2 class="slide-header">Error Distribution Comparison</h2>
+        <img src="output/future_prediction/error_distributions.png" alt="Error Distribution Comparison" style="max-width: 90%; max-height: 400px;">
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Key Findings Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Key Findings</h2>
+        <div class="slide-content" style="height: 350px; overflow: hidden;">
+            <div class="text-content" style="padding-right: 10px;">
+                <h3 style="font-size: 18px; margin: 5px 0;">Most Influential Habits on Academic Performance:</h3>
+                <ol style="font-size: 15px; margin: 5px 0; padding-left: 25px;">
+                    <li><strong>Study Hours:</strong> Each additional hour (up to 8) links to higher CGPA</li>
+                    <li><strong>Class Responsive Rate:</strong> Active participation matters more than attendance</li>
+                    <li><strong>Sleep Duration:</strong> 7-8 hours is optimal for performance</li>
+                    <li><strong>Assessment Rate:</strong> Completing assignments strongly predicts success</li>
+                    <li><strong>Screen Time:</strong> More than 4 hours/day associates with lower grades</li>
+                    <li><strong>Stress Level:</strong> Lower stress correlates with better performance</li>
+                    <li><strong>Extra Classes:</strong> Participation adds ~0.3 points to CGPA</li>
+                </ol>
+            </div>
+            <div class="image-content" style="padding-left: 10px;">
+                <div class="highlight-box" style="padding: 10px;">
+                    <h3 style="font-size: 18px; margin: 5px 0; text-align: center;">What This Means for Students</h3>
+                    <ul style="font-size: 15px; margin: 5px 0; padding-left: 25px;">
+                        <li><strong>Consistency Matters:</strong> Regular study beats cramming</li>
+                        <li><strong>Balance is Key:</strong> Good sleep + focused study + stress management = success</li>
+                        <li><strong>Engagement is Crucial:</strong> Active class participation is vital</li>
+                        <li><strong>Early Warning Signs:</strong> Changes in participation predict grade changes 2-3 weeks ahead</li>
+                        <li><strong>Small Changes Help:</strong> Even modest habit improvements boost grades</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Practical Applications Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Practical Applications</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <h3>For Students:</h3>
+                <ul>
+                    <li>Personalized habit improvement recommendations</li>
+                    <li>Early warning system for potential academic difficulties</li>
+                    <li>Performance prediction based on current habits</li>
+                    <li>Targeted habit adjustment suggestions</li>
+                </ul>
+                
+                <h3>For Educators:</h3>
+                <ul>
+                    <li>Identification of at-risk students for early intervention</li>
+                    <li>Understanding behavioral factors affecting class performance</li>
+                    <li>Data-driven advising and mentoring</li>
+                    <li>Evaluation of educational support effectiveness</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <h3>For Institutions:</h3>
+                <ul>
+                    <li>Resource allocation for student support services</li>
+                    <li>Development of targeted intervention programs</li>
+                    <li>Improvement in retention and graduation rates</li>
+                    <li>Evidence-based policy development</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <h3>Implementation Example</h3>
+                    <p>The web interface provides:</p>
+                    <ul>
+                        <li>Habit assessment questionnaire</li>
+                        <li>Personalized CGPA prediction</li>
+                        <li>Visualization of influential factors</li>
+                        <li>Custom recommendations with expected impact</li>
+                        <li>Progress tracking and adjustment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Limitations and Future Work Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Limitations & Future Work</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <h3>Current Limitations:</h3>
+                <ul style="margin-bottom: 5px;">
+                    <li>Self-reported data subject to reporting biases</li>
+                    <li>Sample limited to 2000 students</li>
+                    <li>Limited external contextual factors considered</li>
+                    <li>Correlation vs. causation distinction</li>
+                    <li>Cultural specificity to the educational context</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <h3>Future Research Directions:</h3>
+                <ul>
+                    <li><strong>Extended Data Collection:</strong> Include health and nutrition data</li>
+                    <li><strong>Sensor Integration:</strong> Objective data from wearable devices</li>
+                    <li><strong>Longitudinal Studies:</strong> Track habit changes over multiple semesters</li>
+                    <li><strong>Causal Modeling:</strong> Investigate causal relationships between habits and performance</li>
+                    <li><strong>Cross-Cultural Validation:</strong> Test model in diverse educational settings</li>
+                    <li><strong>Intervention Studies:</strong> Measure effectiveness of recommended habit changes</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Conclusion Slide -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Conclusion</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <ul class="conclusion-list">
+                    <li>The Habitor system successfully predicts student academic performance (CGPA) based on habits and behaviors with 92% accuracy using an ensemble approach.</li>
+                    <li>The BI-LSTM neural network effectively captures temporal dependencies in student behavior patterns, outperforming traditional machine learning approaches.</li>
+                    <li>Combining BI-LSTM with Gradient Boosting provides both high accuracy and interpretable insights into influential habits.</li>
+                    <li>Study consistency, class responsiveness, and sleep patterns emerged as the most significant predictors of academic performance.</li>
+                    <li>The system offers practical applications for students, educators, and institutions through early intervention and personalized recommendations.</li>
+                </ul>
+            </div>
+            <div class="image-content">
+                <div class="highlight-box" style="background-color: #e8f4fc;">
+                    <h3 style="text-align: center;">Key Contributions</h3>
+                    <ol>
+                        <li>Novel application of BI-LSTM to model student habits</li>
+                        <li>Effective dual-model ensemble prediction approach</li>
+                        <li>Comprehensive framework from data collection to recommendation</li>
+                        <li>Identification of specific habit patterns with highest impact</li>
+                        <li>Practical system for educational intervention and support</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+    
+    <!-- Thank You Slide -->
+    <div class="slide-container title-slide" style="background: linear-gradient(135deg, #3498db, #8e44ad);">
+        <h1>Thank You</h1>
+        <h2>Questions & Discussion</h2>
+        <br>
+        <p>Habitor: Predicting Student Grades Based on Student Habits</p>
+    </div>
+
+    <!-- NEW SLIDE: Python Files Explained -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Our Project Files Explained</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">app.py</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Web interface for users to input habits and view predictions</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">main.py</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Starting point that coordinates all components</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">analysis_page.py</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Creates visualizations of habit-performance relationships</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">predict_page.py</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Handles prediction functionality and recommendations</p>
+                </div>
+            </div>
+            <div class="image-content">
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">bilstm_architecture.py</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Defines our neural network model structure</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">requirements.txt</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Lists all required software libraries</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">README.md</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Project setup guide and documentation</p>
+                </div>
+                
+                <div class="file-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">student_habits_dataset.csv</h3>
+                    <p style="font-size: 14px; margin: 3px 0;">Our collection of student data (2000 records)</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+
+    <!-- NEW SLIDE: Visual Output Gallery -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Our Visualizations Explained</h2>
+        <div class="slide-content">
+            <div class="text-content">
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">Types of Visualizations:</h3>
+                    <ul style="font-size: 14px; margin: 3px 0; padding-left: 20px;">
+                        <li><strong>Correlation Heatmaps:</strong> Show relationships between habits</li>
+                        <li><strong>Feature Distributions:</strong> Display habit patterns</li>
+                        <li><strong>Confusion Matrices:</strong> Evaluate prediction accuracy</li>
+                        <li><strong>Learning Curves:</strong> Track model improvement</li>
+                        <li><strong>Feature Importance:</strong> Identify key habit influences</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-content">
+                <div class="image-gallery">
+                    <div class="gallery-item">
+                        <img src="output/visualizations/correlation_heatmap.png" alt="Correlation Heatmap" style="max-height: 120px;">
+                        <p>Relationship strength between habits</p>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="output/bilstm/confusion_matrix.png" alt="BI-LSTM Confusion Matrix" style="max-height: 120px;">
+                        <p>Model prediction accuracy visualization</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+
+    <!-- NEW SLIDE: Detailed Model Comparison -->
+    <div class="slide-container content-slide">
+        <h2 class="slide-header">Model Comparison in Plain Language</h2>
+        <div class="slide-content" style="height: 350px; overflow: hidden;">
+            <div class="text-content" style="padding-right: 10px;">
+                <h3 style="font-size: 18px; margin: 5px 0;">Which approach works best?</h3>
+                <p style="font-size: 15px; margin: 5px 0;">We compared different ways of predicting student grades to find the most accurate method:</p>
+                
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">Traditional Methods:</h3>
+                    <ul style="font-size: 14px; margin: 3px 0; padding-left: 20px;">
+                        <li><strong>Linear Regression:</strong> A simple approach that draws a straight line through the data (65% accurate)</li>
+                        <li><strong>Random Forest:</strong> Combines many decision trees like flowcharts (78% accurate)</li>
+                        <li><strong>Support Vector:</strong> Finds boundaries between grade groups (73% accurate)</li>
+                    </ul>
+                </div>
+                
+                <div class="simple-explanation" style="padding: 8px; margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; margin: 3px 0;">Advanced Methods:</h3>
+                    <ul style="font-size: 14px; margin: 3px 0; padding-left: 20px;">
+                        <li><strong>Standard LSTM:</strong> Neural network that remembers patterns over time (79% accurate)</li>
+                        <li><strong>BI-LSTM:</strong> Improved neural network looking at data in both directions (87% accurate)</li>
+                        <li><strong>Gradient Boosting:</strong> Series of models fixing previous mistakes (82% accurate)</li>
+                        <li><strong>Ensemble:</strong> Our best method - combines BI-LSTM and Gradient Boosting (92% accurate)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-content" style="padding-left: 10px;">
+                <div class="model-comparison">
+                    <h3 style="font-size: 16px; margin: 5px 0; text-align: center;">Why Our Ensemble Approach Works Better</h3>
+                    <img src="output/future_prediction/error_distributions.png" alt="Error Distribution Comparison" style="max-width: 100%; max-height: 140px;">
+                    <p style="font-size: 14px; margin: 5px 0; text-align: center;">This graph shows our ensemble model makes smaller errors than other methods.</p>
+                    
+                    <div class="simple-explanation" style="padding: 8px; margin-top: 5px;">
+                        <h3 style="font-size: 16px; margin: 3px 0;">Key Benefits:</h3>
+                        <ul style="font-size: 14px; margin: 3px 0; padding-left: 20px;">
+                            <li><strong>Higher Accuracy:</strong> 92% correct predictions</li>
+                            <li><strong>Smaller Errors:</strong> Usually off by only 0.15 GPA points</li>
+                            <li><strong>Better Understanding:</strong> Shows which habits matter most</li>
+                            <li><strong>More Reliable:</strong> Works well for all student types</li>
+                            <li><strong>Practical Insights:</strong> Provides specific recommendations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Habitor Project Presentation</div>
+    </div>
+</body>
+</html> 

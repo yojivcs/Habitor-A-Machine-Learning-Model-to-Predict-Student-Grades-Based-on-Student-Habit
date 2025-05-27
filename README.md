@@ -1,114 +1,142 @@
-# Habitor - Student Grade Prediction System
+# Habitor - Student Grade Prediction Based on Habits
 
-Habitor is a comprehensive machine learning system that predicts student grades based on their habits. This system uses multiple machine learning techniques including Bidirectional LSTM and Gradient Boosting to achieve accurate predictions.
+Habitor is an intelligent system that predicts student academic performance (CGPA) based on their habits and behaviors. The application uses a Bidirectional LSTM neural network and Gradient Boosting models to analyze the relationship between student habits and academic outcomes, providing personalized recommendations for improvement.
 
-## System Architecture
+![Habitor Preview](https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80)
 
-The system follows a comprehensive machine learning pipeline:
+## Features
 
-1. **Data Collection**: Loading and inspecting the student habits dataset
-2. **Data Visualization**: Creating visualizations to understand patterns in student habits
-3. **Preprocessing**: Cleaning data, handling missing values, encoding categorical features, and scaling numerical features
-4. **Count Vectorization**: Converting categorical features into a format suitable for machine learning
-5. **BI-LSTM Model**: Training a Bidirectional Long Short-Term Memory neural network
-6. **Gradient Boosting Model**: Training a Gradient Boosting model as an alternative approach
-7. **Future Prediction**: Using the trained models to make predictions
-8. **Model Evaluation**: Comparing model performance and generating evaluation reports
+- **CGPA Prediction**: Predict student academic performance based on various habits and behaviors
+- **Dual Model Approach**: Utilizes both BI-LSTM neural networks and Gradient Boosting for high accuracy
+- **Ensemble Predictions**: Combines multiple model outputs for more robust predictions
+- **Personalized Recommendations**: Get tailored suggestions to improve academic performance
+- **Interactive Data Visualization**: Explore visualizations showing relationships between habits and performance
+- **Department-Specific Analysis**: See how success factors vary across different academic departments
+- **Model Evaluation**: Comprehensive performance metrics and comparisons between models
+- **Responsive Web Interface**: Clean, modern UI with dark/light mode toggle
 
-## Installation
+## Getting Started
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd habitor
+### Prerequisites
 
-# Install dependencies
-pip install -r requirements.txt
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/habitor.git
+   cd habitor
+   ```
+
+2. Install the required dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+### Running the Application
+
+Run the main ML pipeline:
+
+```
+python main.py
 ```
 
-## Usage
+Or run the Streamlit web application:
 
-### Running the full pipeline
-
-```bash
-python main.py --data "path/to/dataset.xlsx"
+```
+streamlit run app.py
 ```
 
-### Running specific steps
-
-You can run specific steps of the pipeline:
-
-```bash
-python main.py --steps data visualization preprocessing
-```
-
-Available steps:
-- `data`: Data collection
-- `visualization`: Data visualization
-- `preprocessing`: Data preprocessing
-- `vectorization`: Count vectorization
-- `bilstm`: BI-LSTM model training
-- `gradient`: Gradient Boosting model training
-- `prediction`: Future prediction
-- `evaluation`: Model evaluation
-- `all`: Run all steps (default)
-
-### Additional options
-
-```bash
-python main.py --help
-```
-
-- `--data`: Path to the student habits dataset (default: "Reports and Dataset/student_habits_dataset.xlsx")
-- `--output`: Path to the output directory (default: "output")
-- `--epochs`: Number of epochs for BI-LSTM training (default: 50)
-- `--tune`: Perform hyperparameter tuning for Gradient Boosting
-
-## Output
-
-All output files, including visualizations, models, and evaluation reports, are saved in the `output` directory. Each module creates its own subdirectory to organize the outputs.
+The web application will open in your default web browser at `http://localhost:8501`.
 
 ## Project Structure
 
 ```
 habitor/
-├── main.py                 # Main entry point
-├── requirements.txt        # Dependencies
-├── Reports and Dataset/    # Dataset directory
-│   └── student_habits_dataset.xlsx
-├── src/                    # Source code
-│   ├── data_collection.py  # Data loading and summarization
-│   ├── data_visualization.py # Data visualization
-│   ├── preprocessing.py    # Data preprocessing
-│   ├── count_vectorization.py # Feature vectorization
-│   ├── bilstm_model.py     # BI-LSTM model implementation
-│   ├── gradient_boosting_model.py # Gradient Boosting model
-│   ├── future_prediction.py # Future prediction module
-│   ├── model_evaluation.py # Model evaluation and comparison
-│   └── main.py            # Pipeline implementation
-└── output/                # Generated output files
+├── app.py                      # Main Streamlit web application
+├── predict_page.py             # CGPA prediction page
+├── analysis_page.py            # Data analysis and visualization page
+├── main.py                     # Entry point for ML pipeline execution
+├── requirements.txt            # Project dependencies
+├── README.md                   # Project documentation
+├── habitor_project_report.html # Detailed project report
+├── flow_chart.txt              # ML pipeline flow chart
+├── src/                        # Source code for ML pipeline
+│   ├── main.py                 # Main orchestrator for ML pipeline
+│   ├── data_collection.py      # Data loading and initial processing
+│   ├── data_visualization.py   # Data visualization components
+│   ├── preprocessing.py        # Data preprocessing and feature engineering
+│   ├── count_vectorization.py  # Feature vectorization for categorical data
+│   ├── bilstm_model.py         # Bidirectional LSTM neural network model
+│   ├── gradient_boosting_model.py # Gradient Boosting model implementation
+│   ├── future_prediction.py    # Prediction module for trained models
+│   └── model_evaluation.py     # Model evaluation and comparison tools
+├── output/                     # Generated outputs, visualizations, and reports
+└── images/                     # Images for web interface and documentation
 ```
 
-## Models
+## ML Pipeline Flow
 
-### BI-LSTM (Bidirectional Long Short-Term Memory)
+The Habitor ML pipeline follows a structured flow:
 
-The BI-LSTM model is a deep learning approach that captures sequential patterns in the data. It uses two LSTM layers to process the input in both forward and backward directions, allowing it to capture complex relationships between features.
+1. **Data Collection**: Loading student data from CSV files
+2. **Data Visualization**: Creating exploratory visualizations
+3. **Preprocessing**: Handling missing values, encoding, scaling, and splitting
+4. **Feature Vectorization**: Converting categorical data to numerical format
+5. **BI-LSTM Model**: Training a Bidirectional LSTM neural network
+6. **Gradient Boosting Model**: Training a Gradient Boosting model
+7. **Future Prediction**: Making predictions with both models
+8. **Model Evaluation**: Comparing model performance and generating reports
 
-### Gradient Boosting
+## Usage
 
-The Gradient Boosting model is a traditional machine learning approach that builds an ensemble of decision trees. It's effective for tabular data and provides feature importance information, which helps in understanding what student habits are most predictive of grades.
+### ML Pipeline
 
-## Evaluation
+Run the ML pipeline for model training and evaluation:
 
-Models are evaluated using several metrics:
-- Mean Squared Error (MSE)
-- Root Mean Squared Error (RMSE)
-- Mean Absolute Error (MAE)
-- R-squared (R²)
+```
+python main.py
+```
 
-The model comparison report helps in determining which model performs best for the given dataset.
+This will execute the full machine learning pipeline and generate output visualizations and reports in the `output` directory.
+
+### Web Interface
+
+1. **Predict CGPA**:
+   - Fill out the form with your habits and behaviors
+   - Click "Predict My CGPA" to get your predicted academic performance
+   - Review personalized recommendations and habit impact analysis
+
+2. **Explore Data Analysis**:
+   - Navigate to the "Data Analysis" tab
+   - Explore visualizations showing correlations between habits and performance
+   - Review department-specific insights and key success factors
+
+## Technology Stack
+
+- **TensorFlow/Keras**: Deep learning framework for BI-LSTM model
+- **Scikit-learn**: Machine learning utilities and Gradient Boosting model
+- **Pandas & NumPy**: Data manipulation and analysis
+- **Matplotlib & Seaborn**: Data visualizations
+- **Streamlit**: Web application framework
+- **Plotly**: Interactive data visualizations
+
+## Future Enhancements
+
+- Mobile application with habit tracking functionality
+- Integration with learning management systems
+- Expanded recommendation system with specific action plans
+- Collaborative features for peer support and group study planning
+- Real-time habit monitoring and ongoing prediction updates
 
 ## License
 
-[MIT License](LICENSE) 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Southern University Bangladesh for supporting this research
+- All students who participated in the data collection process
+- Open-source libraries and tools used in this project 
